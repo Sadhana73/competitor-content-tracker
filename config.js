@@ -36,7 +36,7 @@ window.TRACKER_CONFIG = {
       backupFeeds: [ "https://news.google.com/rss/search?q=site:pipedrive.com/en/blog&hl=en-US&gl=US&ceid=US:en" ] },
     { name: "Salesforce", role: "competitor", color: "#0b76d1",
       feeds: [ "https://www.salesforce.com/blog/feed/",
-               "https://news.google.com/rss/search?q=site:salesforce.com/blog&hl=en-US&gl=US&ceid=US:en" ],
+               "https://news.google.com/rss/search?q=site:salesforce.com/blog+when:7d&hl=en-US&gl=US&ceid=US:en" ],
       backupFeeds: [ "https://news.google.com/rss/search?q=site:salesforce.com/blog+when:7d",
                      "https://www.bing.com/news/search?q=site%3Asalesforce.com%2Fblog&format=RSS" ] },
     { name: "Brevo", role: "competitor", color: "#0b996e",

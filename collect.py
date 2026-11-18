@@ -281,6 +281,9 @@ def step_feeds():
                 continue                                   # Google News author or topic page, not an article
             if url in known or (co["name"], title.lower()) in known_titles: continue
             pub = it["published"]
+            if "news.google.com" in url and pub:
+                since = (datetime.date.fromisoformat(today) - datetime.timedelta(days=cfg.get("sitemapLookbackDays", 45))).isoformat()
+                if pub < since: continue                   # Google News also returns old pages; only recent ones are new
             pages.append({
                 "url": url, "title": title, "company": co["name"],
                 "published": pub or today, "dateMissing": not pub,
