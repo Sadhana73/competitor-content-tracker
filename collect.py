@@ -234,6 +234,23 @@ def title_from_url(u):
     slug = re.sub(r"\.(html?|php)$", "", slug)
     return slug.replace("-", " ").strip().capitalize() or u
 
+
+def dedupe(pages):
+    """The same article can arrive from two sources (e.g. Google News and a sitemap). Count it once,
+    keeping the copy with the real page address."""
+    groups = {}
+    for p in pages:
+        if p.get("exclude") or p.get("needsDate"): continue
+        key = (p["company"], re.sub(r"\W+", " ", p["title"].lower()).strip())
+        groups.setdefault(key, []).append(p)
+    n = 0
+    for ps in groups.values():
+        if len(ps) < 2: continue
+        ps.sort(key=lambda p: ("news.google.com" in p["url"], p["collected"]))
+        for extra in ps[1:]:
+            extra["exclude"] = "duplicate of " + ps[0]["url"]; n += 1
+    return n
+
 # ---------------------------------------------------------------- step 1: feeds
 def step_feeds():
     cfg = load_config()
@@ -378,6 +395,8 @@ def step_enrich(limit=25, budget=150):
         done += 1
         print(f"  {done}/{min(limit, len(todo))}  {p['company']}: {p['title'][:60]}", flush=True)
         if done % 10 == 0: save_store(pages)          # save progress as we go
+    dups = dedupe(pages)
+    if dups: print(f"Removed {dups} duplicate page(s) found through two sources.")
     save_store(pages)
     left = len([p for p in pages if not p.get("enriched") and not p.get("viaNews")])
     print(f"Opened {done} pages. Still to open: {left}.")
