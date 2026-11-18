@@ -6,7 +6,7 @@ Serves the dashboard at http://127.0.0.1:8765 (only this Mac can open it) and
 adds an "Update now" button that collects new pages and shows progress on the page.
 Started by double-clicking "Competitor Tracker" in this folder.
 """
-import os, sys, io, json, time, threading, datetime, contextlib
+import os, sys, io, json, time, threading, datetime, contextlib, importlib
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -35,6 +35,7 @@ class LogWriter(io.TextIOBase):
 def run_update():
     w = LogWriter()
     try:
+        importlib.reload(collect)          # always use the newest collector, even if it changed while the app was open
         with contextlib.redirect_stdout(w):
             STATE["step"] = "Step 1 of 2: reading the feeds"
             print("Reading every company's feeds…")

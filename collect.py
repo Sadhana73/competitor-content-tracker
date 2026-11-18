@@ -277,6 +277,8 @@ def step_feeds():
             if " - " in title and it.get("source") and title.endswith(it["source"]):
                 title = title[: -len(it["source"])].rstrip(" -")        # Google News adds " - Source"
             if "/author/" in url or not title: continue
+            if it.get("source") and (re.search(r",\s*Author$", title) or len(title.split()) <= 2):
+                continue                                   # Google News author or topic page, not an article
             if url in known or (co["name"], title.lower()) in known_titles: continue
             pub = it["published"]
             pages.append({
