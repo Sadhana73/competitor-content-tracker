@@ -821,7 +821,7 @@ if(!window.TRACKER_DATA){
     el("wAdd").innerHTML = live
       ? `<input type="text" id="wUrl" placeholder="Paste a page address, e.g. https://www.hubspot.com/"><input type="text" id="wName" placeholder="Name (optional)" style="flex:0 1 220px">
          <button id="wAddBtn">Add page</button><button id="wCheck" ${W.length?"":"disabled"}>Check now</button>`
-      : `<div class="gap" style="font-size:13px">${W.length ? "Snapshot view. Add pages and check them in the Competitor Tracker app." : "No pages watched yet. Add pages in the Competitor Tracker app (Page watch tab)."}</div>`;
+      : `<div class="note" style="margin:0;flex:1">This is a read-only copy, so pages can't be added or checked here. To watch a page, add it in the <b>Competitor Tracker</b> app on the Mac (or send the address to Claude), then run an update.</div>`;
     if(live){
       el("wAddBtn").onclick = async () => {
         const url = el("wUrl").value.trim(); if(!url) return;
@@ -850,7 +850,7 @@ if(!window.TRACKER_DATA){
       return `<div class="wcard"><h3>${esc(w.name)} <a class="u" href="${esc(w.url)}" target="_blank" rel="noopener">${esc(w.url)}</a>
         <span class="gap" style="margin-left:auto;font-weight:500">${when}</span>
         ${live?`<button class="wRem" data-url="${esc(w.url)}" style="font-size:12px;padding:4px 10px">Remove</button>`:""}</h3>${body}</div>`;
-    }).join("") : `<div class="wempty">No pages watched yet.${live?" Paste an address above, for example a competitor's home page, and click <b>Add page</b>.":""}</div>`;
+    }).join("") : (live ? `<div class="wempty">No pages watched yet. Paste an address above, for example a competitor's home page, and click <b>Add page</b>.</div>` : "");
     document.querySelectorAll(".wRem").forEach(b=>b.onclick = async () => {
       await fetch("/api/watch", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({action:"remove", url: b.dataset.url})}); location.reload();
     });
