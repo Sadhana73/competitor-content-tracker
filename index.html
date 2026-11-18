@@ -282,7 +282,8 @@
     <div class="hcards hidden" id="hCards"></div>
 
     <h3 style="margin:28px 0 4px;font-size:17px">What their pages ask readers to do</h3>
-    <div class="help" style="margin:0 0 12px">Share of each company's pages (same period) that include each call to action. A page can have more than one. "Pages" counts only pages the collector has opened and checked. Notes appear only with 5+ checked pages. Detection is still being improved: many sites add their buttons after the page loads, so some calls to action are missed.</div>
+    <div class="help" style="margin:0 0 12px">Share of each company's pages (same period) that include each call to action. A page can have more than one. "Pages" counts only pages the collector has opened and checked. Notes appear only with 5+ checked pages.</div>
+    <div class="note" style="margin-bottom:12px">Checked by hand: pages under <b>No call to action</b> are regular blog posts. They inform the reader but don't ask them to start a trial, book a demo or download anything inside the article.</div>
     <div class="ctaNotes" id="ctaNotes"></div>
     <div class="panel"><div class="scroll"><table id="ctaTable"><thead></thead><tbody></tbody></table></div></div>
   </section>
@@ -718,7 +719,7 @@ if(!window.TRACKER_DATA){
       return {c, n, pct};
     });
     const ctaCols = [...ctaTypes, "__none__"];
-    el("ctaTable").querySelector("thead").innerHTML = `<tr><th>Company</th><th class="n">Pages</th>${ctaCols.map(t=>`<th class="c">${t==="__none__"?"No call to action":esc(t)}</th>`).join("")}</tr>`;
+    el("ctaTable").querySelector("thead").innerHTML = `<tr><th>Company</th><th class="n">Pages</th>${ctaCols.map(t=>`<th class="c">${t==="__none__"?"No call to action<br><span style='text-transform:none;font-weight:500'>(plain blog posts)</span>":esc(t)}</th>`).join("")}</tr>`;
     el("ctaTable").querySelector("tbody").innerHTML = ctaRows.map(r=>{
       const top = Math.max(...ctaTypes.map(t=>r.pct[t]));
       return `<tr><td class="${r.c.role==="baseline"?"base":""}"><span class="dot" style="background:${r.c.color};margin-right:6px"></span><b>${esc(r.c.name)}</b></td><td class="n">${r.n}</td>
