@@ -60,6 +60,8 @@
   #cmp tbody tr{cursor:pointer} #cmp tbody tr:hover td{background:#f9fafb}
   #cmp tbody tr:hover td.base{background:#fdeeee}
   .lead{font-weight:700}
+  a.cnt{color:inherit;display:inline-block;min-width:26px;padding:2px 6px;margin:-2px -6px;border-radius:6px}
+  a.cnt:hover{background:#dbe7ff;color:var(--link);text-decoration:underline}
   .zero{color:#c0c5cf}
   .status{display:inline-block;border-radius:6px;padding:3px 9px;font-size:12px;font-weight:600}
   .s-missing{background:var(--missing-bg);color:var(--missing)}
@@ -242,7 +244,7 @@
     <div class="panel"><div class="scroll">
       <table id="cmp"><thead></thead><tbody></tbody></table>
     </div></div>
-    <div class="help">Click a category to open its day-by-day view for this month.</div>
+    <div class="help">Click a number to see those pages. Click a category name to open its day-by-day view for this month.</div>
 
     <div class="legend" id="legend"></div>
   </section>
@@ -455,11 +457,15 @@ if(!window.TRACKER_DATA){
       return `<tr data-cat="${esc(r.cat)}"><td><div class="catname" title="${esc(covers)}">${esc(r.cat)}</div></td>
         ${COMPANIES.map(c=>{
           const n = r.counts[c.name], isLead = r.leader.includes(c.name);
-          return `<td class="n ${c.role==="baseline"?"base":""} ${n===0?"zero":""} ${isLead?"lead":""}">${n}</td>`;}).join("")}
+          return `<td class="n ${c.role==="baseline"?"base":""} ${n===0?"zero":""} ${isLead?"lead":""}">${n ? `<a href="#pages" class="cnt" data-co="${esc(c.name)}" data-cat="${esc(r.cat)}" title="See these ${n} page${n>1?"s":""}">${n}</a>` : n}</td>`;}).join("")}
         <td class="gap">${gap}</td>
         <td><span class="status ${STATUS[r.st].cls}">${STATUS[r.st].label}</span></td></tr>`;
     }).join("") || `<tr><td colspan="${COMPANIES.length+3}" class="gap">No categories match the selected statuses.</td></tr>`;
 
+    document.querySelectorAll("#cmp a.cnt").forEach(a=>a.onclick=e=>{
+      e.preventDefault(); e.stopPropagation();
+      openPages({co:a.dataset.co, cat:a.dataset.cat, from:`${key}-01`, to:`${key}-${String(daysIn(key)).padStart(2,"0")}`});
+    });
     document.querySelectorAll("#cmp tbody tr[data-cat]").forEach(tr=>tr.onclick=()=>{
       dCat.value = tr.dataset.cat; dMonth.value = key; selCell = null; location.hash = "daily"; });
 
