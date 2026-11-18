@@ -1,0 +1,487 @@
+===== Pipedrive =====
+FEED no    0 items  https://www.pipedrive.com/en/blog/rss  (HTTP Error 404: Not Found)
+FEED no    0 items  https://www.pipedrive.com/en/blog/rss.xml  (HTTP Error 404: Not Found)
+FEED no    0 items  https://www.pipedrive.com/en/blog/feed.xml  (HTTP Error 404: Not Found)
+FEED no    0 items  https://www.pipedrive.com/blog/feed  (HTTP Error 404: Not Found)
+FEED OK   60 items  https://news.google.com/rss/search?q=site:pipedrive.com/en/blog&hl=en-US&gl=US&ceid=US:en
+ROBOTS https://www.pipedrive.com: 1 sitemap(s)
+SITEMAP OK   index   148 entries  https://www.pipedrive.com/sitemap-index.xml
+      https://www.pipedrive.com/sitemaps/cs-landing-page-images.xml
+      https://www.pipedrive.com/sitemaps/cs-landing-page-videos.xml
+      https://www.pipedrive.com/sitemaps/cs-landing-pages.xml
+      https://www.pipedrive.com/sitemaps/de-blog-page-images.xml
+      https://www.pipedrive.com/sitemaps/de-blog-page-videos.xml
+      https://www.pipedrive.com/sitemaps/de-blog-pages.xml
+      https://www.pipedrive.com/sitemaps/de-category-sitemap.xml
+      https://www.pipedrive.com/sitemaps/de-hub-page-images.xml
+      https://www.pipedrive.com/sitemaps/de-hub-page-videos.xml
+      https://www.pipedrive.com/sitemaps/de-hub-pages.xml
+      https://www.pipedrive.com/sitemaps/de-landing-page-images.xml
+      https://www.pipedrive.com/sitemaps/de-landing-page-videos.xml
+      https://www.pipedrive.com/sitemaps/de-landing-pages.xml
+      https://www.pipedrive.com/sitemaps/de-newsroom.xml
+      https://www.pipedrive.com/sitemaps/en-blog-page-images.xml
+      https://www.pipedrive.com/sitemaps/en-blog-page-videos.xml
+      https://www.pipedrive.com/sitemaps/en-blog-pages.xml
+      https://www.pipedrive.com/sitemaps/en-category-sitemap.xml
+      https://www.pipedrive.com/sitemaps/en-hub-category-page-images.xml
+      https://www.pipedrive.com/sitemaps/en-hub-category-page-videos.xml
+      https://www.pipedrive.com/sitemaps/en-hub-category-pages.xml
+      https://www.pipedrive.com/sitemaps/en-hub-page-images.xml
+      https://www.pipedrive.com/sitemaps/en-hub-page-videos.xml
+      https://www.pipedrive.com/sitemaps/en-hub-pages.xml
+      https://www.pipedrive.com/sitemaps/en-landing-page-images.xml
+
+===== Brevo =====
+FEED no    0 items  https://www.brevo.com/blog/rss/  (HTTP Error 404: Not Found)
+FEED no    0 items  https://www.brevo.com/blog/feed.xml  (HTTP Error 404: Not Found)
+FEED no    0 items  https://www.brevo.com/feed/  (HTTP Error 404: Not Found)
+FEED no    0 items  https://www.brevo.com/blog/rss.xml  (HTTP Error 404: Not Found)
+FEED OK   59 items  https://news.google.com/rss/search?q=site:brevo.com/blog&hl=en-US&gl=US&ceid=US:en
+ROBOTS https://www.brevo.com: 7 sitemap(s)
+SITEMAP OK   index     6 entries  https://www.brevo.com/sitemap.xml
+      https://www.brevo.com/sitemap_en.xml
+      https://www.brevo.com/sitemap_fr.xml
+      https://www.brevo.com/sitemap_de.xml
+      https://www.brevo.com/sitemap_it.xml
+      https://www.brevo.com/sitemap_pt.xml
+      https://www.brevo.com/sitemap_es.xml
+SITEMAP OK   urls   1843 entries  https://www.brevo.com/sitemap_en.xml
+      https://www.brevo.com/resources/10-efficient-push-notifications/
+      https://www.brevo.com/blog/2025-holiday-trends/
+      https://www.brevo.com/blog/25-holiday-email-marketing-templates/
+      https://www.brevo.com/blog/4-trends-shaping-retail-and-fashion-martech-in-2023/
+      https://www.brevo.com/blog/4th-of-july-email/
+      https://www.brevo.com/blog/5-steps-to-simplify-your-fashion-and-retail-martech-stack/
+      https://www.brevo.com/resources/5-ways-to-improve-e-commerce-kpis/
+      https://www.brevo.com/resources/8-examples-efficient-pop-ups/
+      https://www.brevo.com/resources/8-steps-create-loyalty-program/
+      https://www.brevo.com/blog/abandoned-cart-email/
+      https://www.brevo.com/blog/active-campaign-vs-hubspot-vs-mailerlite-vs-brevo/
+      https://www.brevo.com/blog/activecampaign-alternatives/
+      https://www.brevo.com/blog/add-chat-to-website/
+      https://www.brevo.com/blog/affiliate-email-marketing/
+      https://www.brevo.com/blog/agentic-ai-in-crm/
+      https://www.brevo.com/blog/ai-email-marketing/
+      https://www.brevo.com/blog/ai-in-digital-marketing/
+      https://www.brevo.com/resources/aireuropa-success-story/
+      https://www.brevo.com/resources/aligro-success-story/
+      https://www.brevo.com/resources/alltricks-success-story/
+      https://www.brevo.com/blog/amazon-ses-alternatives/
+      https://www.brevo.com/blog/api-rate-limiting/
+      https://www.brevo.com/blog/apple-mail-privacy-protection/
+      https://www.brevo.com/blog/appointment-confirmation-email-template/
+      https://www.brevo.com/blog/april-newsletter-ideas/
+SITEMAP OK   urls    993 entries  https://www.brevo.com/sitemap_es.xml
+      https://www.brevo.com/es/blog/4-razones-por-las-que-necesitas-una-plataforma-de-email-marketing-para-tu-pyme/
+      https://www.brevo.com/es/blog/4-ventajas-de-usar-un-crm/
+      https://www.brevo.com/es/blog/5-tips-para-encuestas-de-satisfaccion-del-cliente/
+      https://www.brevo.com/es/blog/6-pasos-para-encontrar-el-software-de-email-marketing/
+      https://www.brevo.com/es/blog/8-ejemplos-de-escenarios-de-email-marketing-automation-para-mejorar-tus-conversiones/
+      https://www.brevo.com/es/blog/agregar-video-en-la-newsletter/
+      https://www.brevo.com/es/blog/aliquam-id-rhoncus-ligula-quis-gravida-neque-curabitur-nunc-odio/
+      https://www.brevo.com/es/blog/alternativas-gmail/
+      https://www.brevo.com/es/blog/alternativas-hubspot/
+      https://www.brevo.com/es/blog/alternativas-zoom/
+      https://www.brevo.com/es/blog/api-whatsapp-business/
+      https://www.brevo.com/es/blog/aplicaciones-inteligencia-artificial/
+      https://www.brevo.com/es/blog/aplicaciones-llamadas-por-internet-gratis/
+      https://www.brevo.com/es/blog/aplicaciones-para-editar-fotos-de-productos/
+      https://www.brevo.com/es/blog/atencion-cliente-chat/
+      https://www.brevo.com/es/blog/atencion-cliente-whatsapp/
+      https://www.brevo.com/es/blog/atraer-influencers-con-email-marketing/
+      https://www.brevo.com/es/blog/aumentar-el-trafico-del-blog-con-campanas-rss/
+      https://www.brevo.com/es/blog/aumentar-ventas-de-ecommerce-con-emails-de-carrito-abandonado/
+      https://www.brevo.com/es/blog/aumentar-ventas-de-tu-ecommerce-con-email-marketing/
+      https://www.brevo.com/es/blog/automatizacion-del-marketing-o-crm/
+      https://www.brevo.com/es/blog/automatizacion-email-marketing/
+      https://www.brevo.com/es/blog/base-datos-clientes/
+      https://www.brevo.com/es/resources/benchmark-de-kpi-de-marketing/
+      https://www.brevo.com/es/blog/beneficios-de-herramientas-de-email-marketing/
+SITEMAP OK   urls    753 entries  https://www.brevo.com/sitemap_pt.xml
+      https://www.brevo.com/pt/blog/10-exemplos-marketing-automation-workflow/
+      https://www.brevo.com/pt/blog/a-sendinblue-agora-aceita-pagamentos-em-reais/
+      https://www.brevo.com/pt/blog/active-campaign-alternativas/
+      https://www.brevo.com/pt/blog/agendar-reuniao-online/
+      https://www.brevo.com/pt/blog/alternativas-ao-mailchimp/
+      https://www.brevo.com/pt/blog/api-de-email-marketing/
+      https://www.brevo.com/pt/blog/api-do-whatsapp-business/
+      https://www.brevo.com/pt/blog/atendimento-via-chat/
+      https://www.brevo.com/pt/blog/aumentar-vendas-com-ecommerce-black-friday/
+      https://www.brevo.com/pt/blog/automacao-de-marketing/
+      https://www.brevo.com/pt/blog/beneficios-do-crm/
+      https://www.brevo.com/pt/blog/biografia-instagram/
+      https://www.brevo.com/pt/blog/black-friday-maximizar-vendas/
+      https://www.brevo.com/pt/blog/
+      https://www.brevo.com/pt/email-template/blogpost1/
+      https://www.brevo.com/pt/email-template/blogpost2/
+      https://www.brevo.com/pt/email-template/blogpost3/
+      https://www.brevo.com/pt/email-template/blogpost4/
+      https://www.brevo.com/pt/email-template/blogpost5/
+      https://www.brevo.com/pt/blog/botao-whatsapp-no-seu-site/
+      https://www.brevo.com/pt/blog/calendario-de-marketing-para-feriados/
+      https://www.brevo.com/pt/blog/campanhas-de-natal-para-usar-de-inspiracao/
+      https://www.brevo.com/pt/blog/chat-para-site/
+      https://www.brevo.com/pt/blog/como-criar-uma-landing-page-em-cuatro-passos-guia-completo/
+      https://www.brevo.com/pt/blog/como-criar-uma-newsletter/
+SITEMAP OK   urls    855 entries  https://www.brevo.com/sitemap_it.xml
+      https://www.brevo.com/it/blog/10-migliori-software-di-live-chat/
+      https://www.brevo.com/it/blog/100-oggetti-newsletter-san-valentino/
+      https://www.brevo.com/it/blog/3-scenari-automation-per-e-commerce/
+      https://www.brevo.com/it/blog/5-tattiche-per-ripulire-mailing-list/
+      https://www.brevo.com/it/blog/8-modi-per-migliorare-deliverability/
+      https://www.brevo.com/it/blog/a-che-ora-inviare-newsletter/
+      https://www.brevo.com/it/blog/affiliate-marketing-cose/
+      https://www.brevo.com/it/blog/alternative-mailchimp/
+      https://www.brevo.com/it/blog/apple-mail-privacy-protection/
+      https://www.brevo.com/it/blog/autoresponder/
+      https://www.brevo.com/it/blog/black-friday-marketing/
+      https://www.brevo.com/it/blog/
+      https://www.brevo.com/it/email-template/blogpost1/
+      https://www.brevo.com/it/email-template/blogpost2/
+      https://www.brevo.com/it/email-template/blogpost3/
+      https://www.brevo.com/it/email-template/blogpost4/
+      https://www.brevo.com/it/email-template/blogpost5/
+      https://www.brevo.com/it/blog/bollettino-informativo/
+      https://www.brevo.com/it/blog/bulk-email-significato-e-come-inviare/
+      https://www.brevo.com/it/blog/calendario-marketing/
+      https://www.brevo.com/it/blog/calendly-alternative/
+      https://www.brevo.com/it/blog/chat-business-instagram/
+      https://www.brevo.com/it/blog/chatbot-cose/
+      https://www.brevo.com/it/blog/come-cambiare-lavoro-e-vivere-meglio/
+      https://www.brevo.com/it/blog/come-creare-ecommerce/
+SITEMAP OK   urls   1585 entries  https://www.brevo.com/sitemap_fr.xml
+      https://www.brevo.com/fr/blog/10-conseils-pour-la-redaction-de-vos-newsletters/
+      https://www.brevo.com/fr/resources/10-efficient-push-notifications/
+      https://www.brevo.com/fr/blog/16-chiffres-marketing-automation/
+      https://www.brevo.com/fr/blog/2025-holiday-trends/
+      https://www.brevo.com/fr/blog/3-questions-vous-poser-avant-envoyer-une-campagne-email-marketing/
+      https://www.brevo.com/fr/blog/30-exemples-analyses-clients/
+      https://www.brevo.com/fr/blog/4-exemples-de-campagnes-retargeting-efficaces-sur-facebook/
+      https://www.brevo.com/fr/blog/5-astuces-booster-ecommerce-marketing-automation/
+      https://www.brevo.com/fr/blog/5-exemples-infolettres/
+      https://www.brevo.com/fr/blog/5-raisons-de-lancer-un-blog-pour-votre-site-e-commerce/
+      https://www.brevo.com/fr/resources/5-strategies-crm-a-essayer/
+      https://www.brevo.com/fr/resources/5-strategies-wallet/
+      https://www.brevo.com/fr/blog/6-etapes-pour-trouver-la-bonne-plateforme-demailing-pour-votre-startup/
+      https://www.brevo.com/fr/blog/6-raisons-de-creer-une-chatbox-pour-votre-site/
+      https://www.brevo.com/fr/blog/7-conseils-pour-reduire-labandon-de-panier/
+      https://www.brevo.com/fr/resources/8-examples-efficient-pop-ups/
+      https://www.brevo.com/fr/blog/8-meilleurs-logiciels-grc/
+      https://www.brevo.com/fr/resources/8-steps-create-loyalty-program/
+      https://www.brevo.com/fr/blog/a-quoi-sert-une-newsletter/
+      https://www.brevo.com/fr/blog/ab-test-email/
+      https://www.brevo.com/fr/blog/academie-emailing/
+      https://www.brevo.com/fr/resources/acommeassure-success-story/
+      https://www.brevo.com/fr/blog/actions-de-fidelisation/
+      https://www.brevo.com/fr/blog/actualites/
+      https://www.brevo.com/fr/blog/addon-prestashop/
+SITEMAP OK   urls   1218 entries  https://www.brevo.com/sitemap_de.xml
+      https://www.brevo.com/de/resources/10-efficient-push-notifications/
+      https://www.brevo.com/de/blog/2025-holiday-trends/
+      https://www.brevo.com/de/resources/5-strategies-wallet/
+      https://www.brevo.com/de/resources/8-examples-efficient-pop-ups/
+      https://www.brevo.com/de/resources/8-steps-create-loyalty-program/
+      https://www.brevo.com/de/blog/ab-tests/
+      https://www.brevo.com/de/blog/absenderanforderungen-gmail-und-yahoo/
+      https://www.brevo.com/de/blog/agentic-ai-in-crm/
+      https://www.brevo.com/de/resources/alltricks-smart-segmentation-ia-success-story/
+      https://www.brevo.com/de/resources/alltricks-success-story/
+      https://www.brevo.com/de/blog/apple-mail-privacy-protection/
+      https://www.brevo.com/de/blog/barrierefreie-newsletter/
+      https://www.brevo.com/de/blog/best-of-breed-vs-best-of-suite/
+      https://www.brevo.com/de/blog/bestaetigungs-e-mail/
+      https://www.brevo.com/de/blog/beste-versandzeit-fuer-newsletter/
+      https://www.brevo.com/de/blog/bestellbestaetigung-vorlage/
+      https://www.brevo.com/de/resources/bfcm-hub/
+      https://www.brevo.com/de/blog/black-friday-email-marketing/
+      https://www.brevo.com/de/blog/black-friday-marketing/
+      https://www.brevo.com/de/resources/black-friday-success-strategies-mobile-wallet/
+      https://www.brevo.com/de/blog/
+      https://www.brevo.com/de/resources/blueprint-media/
+      https://www.brevo.com/de/resources/blueprint-travel-tourism/
+      https://www.brevo.com/de/resources/bora-success-story/
+      https://www.brevo.com/de/blog/brevo-chatgpt-plugin-prompts/
+
+===== monday.com =====
+FEED no    0 items  https://monday.com/blog/feed
+FEED no    0 items  https://monday.com/blog/rss
+FEED no    0 items  https://monday.com/blog/rss.xml  (HTTP Error 404: Not Found)
+FEED no    0 items  https://monday.com/blog/en/feed/  (HTTP Error 404: Not Found)
+FEED OK   60 items  https://news.google.com/rss/search?q=site:monday.com/blog&hl=en-US&gl=US&ceid=US:en
+ROBOTS https://monday.com: 1 sitemap(s)
+SITEMAP OK   index     8 entries  https://monday.com/sitemap_index.xml
+      https://monday.com/sitemap.xml
+      https://support.monday.com/hc/sitemap.xml
+      https://monday.com/blog/sitemap_index.xml
+      https://monday.com/presents/sitemap_index.xml
+      https://monday.com/sitemaps/webflow_sitemap.xml
+      https://monday.com/sitemaps/crm_sitemap.xml
+      https://monday.com/sitemap-crm-generator.xml
+      https://monday.com/sitemap-lang.xml
+
+===== Zoho CRM =====
+FEED OK   10 items  https://www.zoho.com/blog/crm/feed
+FEED no    0 items  https://www.zoho.com/crm/feed  (HTTP Error 404: Not Found)
+ROBOTS https://www.zoho.com: 1 sitemap(s)
+SITEMAP OK   urls   3723 entries  https://www.zoho.com/crm/sitemap.xml
+      https://www.zoho.com/crm/compare/
+      https://www.zoho.com/fr/crm/compare/
+      https://www.zoho.com/de/crm/compare/
+      https://www.zoho.com/pt-br/crm/compare/
+      https://www.zoho.com/es-xl/crm/compare/
+      https://www.zoho.com/nl/crm/compare/
+      https://www.zoho.com/ar/crm/compare/
+      https://www.zoho.com/id/crm/compare/
+      https://www.zoho.com/th/crm/compare/
+      https://www.zoho.com/vi/crm/compare/
+      https://www.zoho.com/zh-hant/crm/compare/
+      https://www.zoho.com/crm/cx-platform/
+      https://www.zoho.com/crm/features.html
+      https://www.zoho.com/fr/crm/features.html
+      https://www.zoho.com/de/crm/features.html
+      https://www.zoho.com/pt-br/crm/features.html
+      https://www.zoho.com/es-xl/crm/features.html
+      https://www.zoho.com/nl/crm/features.html
+      https://www.zoho.com/ar/crm/features.html
+      https://www.zoho.com/id/crm/features.html
+      https://www.zoho.com/th/crm/features.html
+      https://www.zoho.com/vi/crm/features.html
+      https://www.zoho.com/zh-hant/crm/features.html
+      https://www.zoho.com/fr-ca/crm/features.html
+      https://www.zoho.com/he/crm/features.html
+SITEMAP OK   urls    523 entries  https://www.zoho.com/sitemap.xml
+      https://www.zoho.com/zia/generative/resources.html
+      https://www.zoho.com/jumpstart/zohocrm.html
+      https://www.zoho.com/r/bigin/choosing-a-crm-for-small-business.html
+      https://www.zoho.com/r/user-resources.html
+SITEMAP OK   index   543 entries  https://www.zoho.com/sitemap-index.xml
+      https://www.zoho.com/accounts/sitemap.xml
+      https://www.zoho.com/ae/books/help/sitemap.xml
+      https://www.zoho.com/ae/books/kb/sitemap.xml
+      https://www.zoho.com/ae/books/vat/sitemap.xml
+      https://www.zoho.com/ae/books/videos/sitemap.xml
+      https://www.zoho.com/ae/books/sitemap.xml
+      https://www.zoho.com/ae/books/accounting-terms/sitemap.xml
+      https://www.zoho.com/ae/books/corporate-tax/sitemap.xml
+      https://www.zoho.com/ae/checkout/sitemap.xml
+      https://www.zoho.com/ae/expense/sitemap.xml
+      https://www.zoho.com/ae/financeplus/sitemap.xml
+      https://www.zoho.com/ae/inventory/sitemap.xml
+      https://www.zoho.com/ae/invoice/help/sitemap.xml
+      https://www.zoho.com/ae/invoice/sitemap.xml
+      https://www.zoho.com/ae/subscriptions/sitemap.xml
+      https://www.zoho.com/ae/billing/help/sitemap.xml
+      https://www.zoho.com/ae/billing/sitemap.xml
+      https://www.zoho.com/en-ae/payroll/sitemap.xml
+      https://www.zoho.com/affiliate/sitemap.xml
+      https://www.zoho.com/assist/help/sitemap.xml
+      https://www.zoho.com/assist/sitemap.xml
+      https://www.zoho.com/au/books/help/sitemap.xml
+      https://www.zoho.com/au/books/kb/sitemap.xml
+      https://www.zoho.com/au/books/videos/sitemap.xml
+      https://www.zoho.com/au/books/sitemap.xml
+
+===== Salesforce =====
+ROBOTS https://www.salesforce.com: 52 sitemap(s)
+SITEMAP OK   urls    623 entries  https://www.salesforce.com/sitemap.xml
+      https://www.salesforce.com/resources/industries/
+      https://www.salesforce.com/resources/roles/
+      https://www.salesforce.com/resources/topics/
+      https://www.salesforce.com/blog-hub/
+      https://www.salesforce.com/resources/content-type/
+      https://www.salesforce.com/crm/worlds-number-one-crm/
+      https://www.salesforce.com/analytics/crm/
+      https://www.salesforce.com/analytics/crm/pricing/
+      https://www.salesforce.com/financial-services/asset-management-crm/
+      https://www.salesforce.com/crm/ai-crm/
+      https://www.salesforce.com/company/accessibility/resources/
+      https://www.salesforce.com/service/contact-center/what-is-contact-center-crm-software/
+      https://www.salesforce.com/education/crm/
+      https://www.salesforce.com/professional-services/accounting-crm/
+      https://www.salesforce.com/professional-services/consulting-crm/
+      https://www.salesforce.com/professional-services/recruiting-crm/
+SITEMAP no   https://www.salesforce.com/ap/sitemap.xml (The read operation timed out)
+SITEMAP OK   urls    555 entries  https://www.salesforce.com/au/sitemap.xml
+      https://www.salesforce.com/au/crm/worlds-number-one-crm/
+      https://www.salesforce.com/au/analytics/crm/
+      https://www.salesforce.com/au/analytics/crm/pricing/
+      https://www.salesforce.com/au/crm/ai-crm/
+      https://www.salesforce.com/au/service/contact-center/what-is-contact-center-crm-software/
+      https://www.salesforce.com/au/education/crm/
+      https://www.salesforce.com/au/crm/what-is-crm/software/
+      https://www.salesforce.com/au/crm/what-is-crm/
+      https://www.salesforce.com/au/crm/reviews/
+      https://www.salesforce.com/au/crm/salesforce-competition/
+      https://www.salesforce.com/au/crm/real-estate-crm/
+      https://www.salesforce.com/au/crm/strategy/
+      https://www.salesforce.com/au/crm/crm-implementation/
+      https://www.salesforce.com/au/crm/crm-integration/
+      https://www.salesforce.com/au/crm/features/
+      https://www.salesforce.com/au/crm/crm-for-small-business/
+      https://www.salesforce.com/au/crm/examples/
+      https://www.salesforce.com/au/crm/comparison/
+      https://www.salesforce.com/au/crm/automation/
+      https://www.salesforce.com/au/crm/best-practices/
+      https://www.salesforce.com/au/crm/best-crm/
+      https://www.salesforce.com/au/crm/benefits-of-crm/
+      https://www.salesforce.com/au/crm/
+      https://www.salesforce.com/au/financial-services/asset-management-crm/
+      https://www.salesforce.com/au/crm/b2b-crm/
+SITEMAP OK   urls    542 entries  https://www.salesforce.com/br/sitemap.xml
+      https://www.salesforce.com/br/crm/ai-crm/
+      https://www.salesforce.com/br/professional-services/accounting-crm/
+      https://www.salesforce.com/br/professional-services/consulting-crm/
+      https://www.salesforce.com/br/professional-services/recruiting-crm/
+      https://www.salesforce.com/br/crm/foundations/
+      https://www.salesforce.com/br/analytics/crm/pricing/
+      https://www.salesforce.com/br/analytics/crm/
+      https://www.salesforce.com/br/crm/
+      https://www.salesforce.com/br/financial-services/asset-management-crm/
+      https://www.salesforce.com/br/crm/benefits-of-crm/
+      https://www.salesforce.com/br/crm/crm-for-small-business/
+      https://www.salesforce.com/br/crm/examples/
+      https://www.salesforce.com/br/crm/what-is-crm/
+      https://www.salesforce.com/br/crm/best-crm/
+      https://www.salesforce.com/br/crm/crm-implementation/
+      https://www.salesforce.com/br/crm/best-practices/
+      https://www.salesforce.com/br/crm/real-estate-crm/
+      https://www.salesforce.com/br/crm/mobile-crm/
+      https://www.salesforce.com/br/crm/crm-integration/
+      https://www.salesforce.com/br/crm/custom-crm/
+      https://www.salesforce.com/br/crm/reviews/
+      https://www.salesforce.com/br/crm/automation/
+      https://www.salesforce.com/br/crm/features/
+      https://www.salesforce.com/br/crm/strategy/
+      https://www.salesforce.com/br/crm/salesforce-competition/
+SITEMAP OK   urls    557 entries  https://www.salesforce.com/ca/sitemap.xml
+      https://www.salesforce.com/ca/crm/worlds-number-one-crm/
+      https://www.salesforce.com/ca/service/contact-center/what-is-contact-center-crm-software/
+      https://www.salesforce.com/ca/crm/ai-crm/
+      https://www.salesforce.com/ca/crm/crm-integration/
+      https://www.salesforce.com/ca/crm/reviews/
+      https://www.salesforce.com/ca/crm/comparison/
+      https://www.salesforce.com/ca/crm/call-center-crm/
+      https://www.salesforce.com/ca/crm/startup-crm/
+      https://www.salesforce.com/ca/crm/b2c-crm/
+      https://www.salesforce.com/ca/crm/crm-implementation/
+      https://www.salesforce.com/ca/crm/zoho-vs-salesforce/
+      https://www.salesforce.com/ca/crm/examples/
+      https://www.salesforce.com/ca/crm/
+      https://www.salesforce.com/ca/crm/automation/
+      https://www.salesforce.com/ca/crm/what-is-crm/
+      https://www.salesforce.com/ca/crm/what-is-crm/software/
+      https://www.salesforce.com/ca/crm/best-crm/
+      https://www.salesforce.com/ca/crm/best-practices/
+      https://www.salesforce.com/ca/crm/strategy/
+      https://www.salesforce.com/ca/crm/benefits-of-crm/
+      https://www.salesforce.com/ca/crm/real-estate-crm/
+      https://www.salesforce.com/ca/crm/crm-for-small-business/
+      https://www.salesforce.com/ca/crm/salesforce-competition/
+      https://www.salesforce.com/ca/crm/features/
+      https://www.salesforce.com/ca/crm/database/
+SITEMAP OK   urls     22 entries  https://www.salesforce.com/cn/sitemap.xml
+      https://www.salesforce.com/cn/
+      https://www.salesforce.com/cn/trailblazer/account-benefits/
+      https://www.salesforce.com/cn/partners/alibaba/
+      https://www.salesforce.com/cn/company/legal/program-agreement/
+      https://www.salesforce.com/cn/company/legal/privacy/personal-data-sharing-alibaba-cloud/
+      https://www.salesforce.com/cn/company/legal/privacy/
+      https://www.salesforce.com/cn/company/legal/privacy/apec-cbpr-prp-notice/
+      https://www.salesforce.com/cn/company/contact-us/
+      https://www.salesforce.com/cn/form/
+      https://www.salesforce.com/cn/search/
+      https://www.salesforce.com/cn/events/
+      https://www.salesforce.com/cn/form/conf/
+      https://www.salesforce.com/cn/form/contact/
+      https://www.salesforce.com/cn/form/industries/
+      https://www.salesforce.com/cn/company/privacy/
+SITEMAP OK   urls    530 entries  https://www.salesforce.com/de/sitemap.xml
+      https://www.salesforce.com/de/crm/ai-crm/
+      https://www.salesforce.com/de/professional-services/consulting-crm/
+      https://www.salesforce.com/de/professional-services/recruiting-crm/
+      https://www.salesforce.com/de/professional-services/accounting-crm/
+      https://www.salesforce.com/de/crm/foundations/
+      https://www.salesforce.com/de/analytics/crm/pricing/
+      https://www.salesforce.com/de/analytics/crm/
+      https://www.salesforce.com/de/financial-services/asset-management-crm/
+SITEMAP OK   urls     19 entries  https://www.salesforce.com/dk/sitemap.xml
+      https://www.salesforce.com/dk/form/sem/crm-display-2013/
+SITEMAP OK   urls    530 entries  https://www.salesforce.com/es/sitemap.xml
+      https://www.salesforce.com/es/crm/ai-crm/
+      https://www.salesforce.com/es/professional-services/accounting-crm/
+      https://www.salesforce.com/es/professional-services/recruiting-crm/
+      https://www.salesforce.com/es/professional-services/consulting-crm/
+      https://www.salesforce.com/es/crm/foundations/
+      https://www.salesforce.com/es/analytics/crm/pricing/
+      https://www.salesforce.com/es/analytics/crm/
+      https://www.salesforce.com/es/financial-services/asset-management-crm/
+SITEMAP OK   urls     70 entries  https://www.salesforce.com/fi/sitemap.xml
+      https://www.salesforce.com/fi/form/pdf/crm-smb-recipe-for-success/
+      https://www.salesforce.com/fi/form/pdf/marketing-automation-and-your-crm/
+      https://www.salesforce.com/fi/form/conf/marketing-automation-and-your-crm/
+      https://www.salesforce.com/fi/resources/research-reports/state-of-the-connected-customer/
+SITEMAP OK   urls    541 entries  https://www.salesforce.com/fr/sitemap.xml
+      https://www.salesforce.com/fr/crm/ai-crm/
+      https://www.salesforce.com/fr/professional-services/recruiting-crm/
+      https://www.salesforce.com/fr/professional-services/accounting-crm/
+      https://www.salesforce.com/fr/professional-services/consulting-crm/
+      https://www.salesforce.com/fr/crm/foundations/
+      https://www.salesforce.com/fr/analytics/crm/pricing/
+      https://www.salesforce.com/fr/analytics/crm/
+      https://www.salesforce.com/fr/financial-services/asset-management-crm/
+      https://www.salesforce.com/fr/crm/what-is-crm/
+      https://www.salesforce.com/fr/crm/
+      https://www.salesforce.com/fr/crm/what-is-crm/software/
+      https://www.salesforce.com/fr/crm/examples/
+      https://www.salesforce.com/fr/crm/real-estate-crm/
+      https://www.salesforce.com/fr/crm/crm-integration/
+      https://www.salesforce.com/fr/crm/pricing/
+      https://www.salesforce.com/fr/crm/zoho-vs-salesforce/
+      https://www.salesforce.com/fr/crm/b2c-crm/
+      https://www.salesforce.com/fr/crm/custom-crm/
+      https://www.salesforce.com/fr/crm/database/
+      https://www.salesforce.com/fr/crm/free-crm/
+      https://www.salesforce.com/fr/crm/b2b-crm/
+      https://www.salesforce.com/fr/crm/cloud-crm/
+      https://www.salesforce.com/fr/crm/report/
+      https://www.salesforce.com/fr/crm/project-management/
+      https://www.salesforce.com/fr/crm/salesforce-alternatives/
+SITEMAP OK   urls    518 entries  https://www.salesforce.com/fr-ca/sitemap.xml
+      https://www.salesforce.com/fr-ca/professional-services/consulting-crm/
+      https://www.salesforce.com/fr-ca/professional-services/recruiting-crm/
+      https://www.salesforce.com/fr-ca/professional-services/accounting-crm/
+      https://www.salesforce.com/fr-ca/crm/foundations/
+      https://www.salesforce.com/fr-ca/analytics/crm/pricing/
+      https://www.salesforce.com/fr-ca/analytics/crm/
+      https://www.salesforce.com/fr-ca/financial-services/asset-management-crm/
+
+===== HubSpot =====
+ROBOTS https://blog.hubspot.com: 1 sitemap(s)
+ROBOTS https://www.hubspot.com: 0 sitemap(s)
+SITEMAP OK   urls   7958 entries  https://blog.hubspot.com/sitemap.xml
+      https://blog.hubspot.com/sales/best-alexa-skills
+      https://blog.hubspot.com/marketing/goals-of-marketing
+      https://blog.hubspot.com/marketing/copywriting-ai-tools
+      https://blog.hubspot.com/service/first-party-data
+      https://blog.hubspot.com/website/musician-website-examples
+      https://blog.hubspot.com/blog/tabid/6307/bid/5326/learning-from-leaders-the-inc-500-and-social-media-usage.aspx
+      https://blog.hubspot.com/marketing/horrifying-display-advertising-stats
+      https://blog.hubspot.com/marketing/history-of-blogging
+      https://blog.hubspot.com/marketing/professional-content-mistakes
+      https://blog.hubspot.com/marketing/x-creator-pay
+      https://blog.hubspot.com/customers/3-steps-discovering-6.8-stakeholders-winning-customers
+      https://blog.hubspot.com/service/customer-segmentation-examples
+      https://blog.hubspot.com/website/backend-testing
+      https://blog.hubspot.com/blog/tabid/6307/bid/28943/25-jaw-dropping-marketing-automation-stats-data.aspx
+      https://blog.hubspot.com/sales/account-manager-interview-questions
+      https://blog.hubspot.com/website/what-is-a-subdomain
+      https://blog.hubspot.com/marketing/local-pr
+      https://blog.hubspot.com/website/api-integration
+      https://blog.hubspot.com/marketing/ai-marketing-tools
+      https://blog.hubspot.com/blog/tabid/6307/bid/33756/why-you-yes-you-need-to-create-more-landing-pages.aspx
+      https://blog.hubspot.com/marketing/guest-writer-popular-websites
+      https://blog.hubspot.com/marketing/create-claude-skills
+      https://blog.hubspot.com/marketing/how-to-show-up-in-chatgpt-results
+      https://blog.hubspot.com/marketing/http-304-not-modified
+      https://blog.hubspot.com/marketing/ai-marketing-automation

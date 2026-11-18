@@ -1,0 +1,18 @@
+#!/bin/bash
+# Opens the Competitor Content Tracker dashboard; starts the helper if it isn't running.
+DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
+export PATH="/opt/homebrew/bin:/usr/local/bin:/Library/Frameworks/Python.framework/Versions/Current/bin:/usr/bin:/bin:$PATH"
+cd "$DIR" || exit 1
+mkdir -p data
+if ! curl -s -m 1 http://127.0.0.1:8765/api/status >/dev/null 2>&1; then
+  nohup python3 server.py > data/server.log 2>&1 &
+  for i in $(seq 1 30); do
+    sleep 0.3
+    curl -s -m 1 http://127.0.0.1:8765/api/status >/dev/null 2>&1 && break
+  done
+fi
+if curl -s -m 1 http://127.0.0.1:8765/api/status >/dev/null 2>&1; then
+  open "http://127.0.0.1:8765/"
+else
+  osascript -e 'display dialog "The Competitor Tracker could not start. Please tell Claude, and share the file data/server.log from the tracker folder." buttons {"OK"} with icon caution'
+fi

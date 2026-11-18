@@ -1,0 +1,8 @@
+# Made automatically — no need to keep
+__pycache__/
+*.pyc
+.DS_Store
+data/server.log
+data/*.tmp
+Competitor Content Tracker.html
+untitled folder/

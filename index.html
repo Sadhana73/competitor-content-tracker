@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Competitor Content Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#fff; --ink:#1d2433; --muted:#667085; --line:#e4e7ec; --soft:#f2f4f7;
+    --accent:#e42527; --link:#175cd3;
+    --missing-bg:#fde8e8; --missing:#b42318;
+    --gap-bg:#fff0e0; --gap:#b54708;
+    --behind-bg:#fef7d6; --behind:#8a6100;
+    --comp-bg:#e3f6ea; --comp:#067647;
+    --none-bg:#f2f4f7; --none:#667085;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.45}
+  a{color:var(--link);text-decoration:none} a:hover{text-decoration:underline}
+  header{background:var(--card);border-bottom:1px solid var(--line);padding:14px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  header h1{font-size:18px;margin:0;font-weight:700}
+  header .sub{color:var(--muted);font-size:13px}
+  .sample{background:#fff4cc;color:#7a5a00;border:1px solid #f5d77a;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600}
+  nav{display:flex;gap:4px;margin-left:auto}
+  nav a{padding:8px 14px;border-radius:8px;color:var(--muted);font-weight:500}
+  nav a.on{background:var(--soft);color:var(--ink);font-weight:600}
+  nav a:hover{text-decoration:none;background:var(--soft)}
+  main{max-width:1480px;margin:0 auto;padding:20px 24px 60px}
+  .bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+  .bar h2{margin:0;font-size:20px}
+  .bar .period{color:var(--muted)}
+  select,input[type=text],input[type=date]{font:inherit;border:1px solid var(--line);border-radius:8px;padding:7px 10px;background:#fff;color:var(--ink)}
+  button{font:inherit;border:1px solid var(--line);border-radius:8px;padding:7px 12px;background:#fff;cursor:pointer}
+  button:hover{background:var(--soft)}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .card .co{display:flex;align-items:center;gap:8px;font-weight:600}
+  .dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none}
+  .card .num{font-size:26px;font-weight:700;margin:6px 0 2px}
+  .card .chg{font-size:12px;color:var(--muted)}
+  .card.base{border-color:#f3b8b8;box-shadow:inset 3px 0 0 var(--accent)}
+  .up{color:var(--comp)} .down{color:var(--missing)}
+  .note{background:#eef4ff;border:1px solid #c7d7fe;color:#2d3f75;border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:13px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .chip{border-radius:999px;padding:4px 12px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid transparent;user-select:none}
+  .chip.off{opacity:.4}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .scroll{overflow-x:auto}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:10px 14px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+  th{background:var(--soft);font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.02em}
+  tr:last-child td{border-bottom:none}
+  td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+  td.base,th.base{background:#fff7f7}
+  #cmp th,#cmp td{padding:10px 9px}
+  #cmp th{white-space:normal;line-height:1.25}
+  #cmp td.gap{white-space:normal;min-width:140px;max-width:190px}
+  #cmp tbody tr{cursor:pointer} #cmp tbody tr:hover td{background:#f9fafb}
+  #cmp tbody tr:hover td.base{background:#fdeeee}
+  .lead{font-weight:700}
+  .zero{color:#c0c5cf}
+  .status{display:inline-block;border-radius:6px;padding:3px 9px;font-size:12px;font-weight:600}
+  .s-missing{background:var(--missing-bg);color:var(--missing)}
+  .s-gap{background:var(--gap-bg);color:var(--gap)}
+  .s-behind{background:var(--behind-bg);color:var(--behind)}
+  .s-comp{background:var(--comp-bg);color:var(--comp)}
+  .s-none{background:var(--none-bg);color:var(--none)}
+  .catname{font-weight:600}
+  .gap{color:var(--muted);font-size:12px}
+  .help{color:var(--muted);font-size:12px;margin-top:10px}
+  .legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:6px 16px;margin-top:14px;font-size:12px;color:var(--muted)}
+  .filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+  .filters input[type=text]{min-width:240px;flex:1}
+  .filters label{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+  #pl td.title{white-space:normal;min-width:240px;max-width:420px}
+  #pl th,#pl td{padding:10px 10px}
+  #pl select{padding:4px 6px;font-size:13px;max-width:200px}
+  .badge{display:inline-block;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:600}
+  .b-high{background:var(--comp-bg);color:var(--comp)}
+  .b-low{background:var(--gap-bg);color:var(--gap)}
+  .b-manual{background:#eef4ff;color:#2d3f75}
+  .b-ai{background:var(--soft);color:var(--muted)}
+  .flag{display:inline-block;margin-left:6px;font-size:11px;color:var(--gap);font-weight:600}
+  .pager{display:flex;align-items:center;gap:8px;justify-content:flex-end;padding:10px 14px;border-top:1px solid var(--line);color:var(--muted)}
+  .count{color:var(--muted);margin-bottom:8px}
+  .alert{display:inline-flex;gap:6px;align-items:center;background:var(--gap-bg);color:var(--gap);border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer}
+  .hidden{display:none}
+  /* ---- update button and progress ---- */
+  .upd{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted)}
+  .upd button{background:var(--accent);color:#fff;border:none;font-weight:600;padding:8px 14px}
+  .upd button:hover{background:#c41f21}
+  .upd button:disabled{background:#f3b8b8;cursor:default}
+  .updPanel{background:#101828;color:#e4e7ec;padding:12px 24px 14px}
+  .updHead{display:flex;align-items:center;gap:10px;max-width:1480px;margin:0 auto 8px;font-size:14px}
+  .updHead .gap{color:#98a2b3}
+  .updHead button{background:transparent;color:#d0d5dd;border-color:#344054;padding:4px 10px;font-size:12px}
+  #updLog{max-width:1480px;margin:0 auto;max-height:180px;overflow:auto;font:12px/1.5 ui-monospace,Menlo,monospace;white-space:pre-wrap;color:#d0d5dd}
+  .spin{width:14px;height:14px;border:2px solid #475467;border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite;display:inline-block}
+  .spin.done{animation:none;border-color:#12b76a;background:#12b76a}
+  .spin.err{animation:none;border-color:#f04438;background:#f04438}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  /* ---- daily 1–30 view ---- */
+  #daily{border-collapse:separate;border-spacing:0;width:100%}
+  main.wide{max-width:1480px}
+  #daily th,#daily td{padding:0;text-align:center;border-bottom:1px solid var(--line);border-right:1px solid #f0f2f5}
+  #daily th.co,#daily td.co{text-align:left;padding:10px 16px;font-size:15px;position:sticky;left:0;background:#fff;z-index:1;min-width:148px;border-right:1px solid var(--line)}
+  #daily th.co{background:var(--soft)}
+  #daily th.d{min-width:33px;padding:8px 0;line-height:1.2;text-transform:none;font-size:14px;color:#344054}
+  #daily th.d small{display:block;font-weight:500;font-size:11px;color:#98a2b3;margin-top:2px}
+  #daily td.c{height:50px;min-width:33px;font-size:15px;font-weight:600;cursor:pointer;font-variant-numeric:tabular-nums}
+  #daily td.c:hover{outline:2px solid #1d2433;outline-offset:-2px}
+  #daily .we{background:#f5f6f8}
+  #daily th.we{background:#eceef2}
+  #daily td.future{background:repeating-linear-gradient(45deg,#f2f4f7,#f2f4f7 4px,#e9ecf0 4px,#e9ecf0 8px);cursor:default;color:transparent}
+  #daily td.future:hover{outline:none}
+  #daily td.sel{outline:2px solid var(--accent)!important;outline-offset:-2px}
+  #daily td.tot,#daily th.tot{min-width:76px;font-weight:700;font-size:16px;padding:10px 16px;text-align:right;border-left:1px solid var(--line);position:sticky;right:0;background:#fff}
+  #daily th.tot{background:var(--soft)}
+  #daily tr.base td.co,#daily tr.base td.tot{background:#fff7f7}
+  #daily tr.sum td{background:var(--soft);font-weight:700;font-size:14px;cursor:default}
+  #daily tr.sum td.c:hover{outline:none}
+  .scale{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+  .scale i{display:inline-block;width:22px;height:16px;border-radius:3px;border:1px solid var(--line)}
+  /* ---- calendar layout ---- */
+  .seg{display:inline-flex;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:3px}
+  .seg button{border:none;background:transparent;padding:6px 14px;border-radius:8px;font-weight:500;color:var(--muted)}
+  .seg button.on{background:#fff;color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(16,24,40,.08)}
+  .cal{display:grid;grid-template-columns:repeat(7,minmax(118px,1fr)) minmax(150px,1.1fr);min-width:1000px}
+  .cal .hd{padding:10px 12px;font-size:13px;font-weight:600;color:var(--muted);background:var(--soft);border-bottom:1px solid var(--line);text-align:right}
+  .cal .hd.wk{text-align:left;border-left:1px solid var(--line)}
+  .cal .day{min-height:132px;padding:8px 8px 10px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);cursor:pointer;display:flex;flex-direction:column;gap:4px}
+  .cal .day:hover{background:#f9fafb}
+  .cal .day.we{background:#fafbfc}
+  .cal .day.out{background:#fcfcfd;cursor:default}
+  .cal .day.out .dn{color:#d0d5dd}
+  .cal .day.future{background:repeating-linear-gradient(45deg,#fafbfc,#fafbfc 6px,#f2f4f7 6px,#f2f4f7 12px);cursor:default}
+  .cal .day.future .dn{color:#98a2b3}
+  .cal .day.sel{box-shadow:inset 0 0 0 2px var(--accent)}
+  .cal .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
+  .cal .tot{font-size:12px;color:var(--muted);font-weight:500}
+  .cal .dn{font-size:17px;font-weight:600;min-width:30px;height:30px;line-height:30px;text-align:center;border-radius:50%}
+  .cal .dn.today{background:var(--accent);color:#fff}
+  .ev{display:flex;align-items:center;gap:6px;border-radius:6px;padding:3px 7px;font-size:13px;line-height:1.3}
+  .ev .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ev b{font-variant-numeric:tabular-nums}
+  .cal .wk{border-bottom:1px solid var(--line);border-left:1px solid var(--line);background:#fbfcfd;padding:10px 12px;font-size:13px;display:flex;flex-direction:column;gap:3px}
+  .cal .wk .lbl{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:3px}
+  .cal .wk .r{display:flex;justify-content:space-between;gap:8px}
+  .cal .wk .r.base{font-weight:700}
+  .cal .wk .r .z{color:var(--missing)}
+  /* ---- habits ---- */
+  .hcards{display:grid;grid-template-columns:1fr;gap:14px;margin-top:16px}
+  #ctaTable td.n{font-variant-numeric:tabular-nums}
+  #ctaTable td.cell{text-align:center;font-weight:600;min-width:96px}
+  #ctaTable th.c{text-align:center;white-space:normal;min-width:96px;line-height:1.3}
+  .ctaNotes{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+  .ctaNotes div{background:#eef4ff;border:1px solid #c7d7fe;border-radius:8px;padding:8px 12px;font-size:14px;color:#2d3f75}
+  .ctab{display:inline-block;background:var(--soft);border-radius:6px;padding:2px 7px;font-size:11px;font-weight:600;color:#344054;margin:1px 2px 1px 0;white-space:nowrap}
+  .hbtn{font-size:13px;font-weight:600;color:var(--link);white-space:nowrap}
+  .hbtn.on{background:var(--soft);color:var(--ink)}
+  #habTable tr.hsel td{background:#f5f8ff}
+  .hcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .hcard.base{box-shadow:inset 3px 0 0 var(--accent)}
+  .hcard h3{margin:0 0 4px;font-size:16px;display:flex;align-items:center;gap:8px}
+  .hcard .sum{color:#344054;font-size:14px;margin:6px 0 14px;line-height:1.5}
+  .hstats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+  .hstat{background:var(--soft);border-radius:8px;padding:8px 10px}
+  .hstat b{display:block;font-size:18px}
+  .hstat span{font-size:11px;color:var(--muted)}
+  .hcols{display:grid;grid-template-columns:minmax(0,420px) 1fr;gap:40px}
+  .hcols h4{margin:0 0 8px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.02em}
+  .wkbars{display:flex;align-items:flex-end;gap:6px;height:90px}
+  .wkbars div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;font-size:11px;color:var(--muted)}
+  .wkbars i{display:block;width:100%;border-radius:4px 4px 0 0;min-height:2px}
+  .wkbars em{font-style:normal;font-weight:600;color:var(--ink);margin-bottom:2px}
+  .catbar{display:grid;grid-template-columns:1fr 110px 34px;align-items:center;gap:8px;font-size:13px;margin-bottom:6px}
+  .catbar .t{height:8px;background:var(--soft);border-radius:4px;overflow:hidden}
+  .catbar .t i{display:block;height:100%}
+  .catbar .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #habTable td.n b{font-size:15px}
+  #habTable td.act{white-space:normal;min-width:260px;max-width:340px;font-size:13px;color:#344054}
+  #habTable td.wrap{white-space:normal;min-width:150px;max-width:210px}
+  .shift{display:grid;grid-template-columns:1fr 70px 46px;gap:8px;align-items:center;font-size:13px;margin-bottom:6px}
+  .shift .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .shift .v{color:var(--muted);font-variant-numeric:tabular-nums;text-align:right}
+  .shift b{text-align:right;font-variant-numeric:tabular-nums}
+  .todo{background:#eef4ff;border:1px solid #c7d7fe;border-radius:8px;padding:10px 12px;font-size:14px;color:#2d3f75;margin:8px 0 14px;line-height:1.5}
+  .reads a{display:block;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px}
+  .reads a:last-child{border-bottom:none}
+  .reads .d{color:var(--muted);font-size:11px;margin-left:6px}
+  #habTable th,#habTable td{padding:10px 10px}
+  @media (max-width:640px){.hcards{grid-template-columns:1fr}.hstats{grid-template-columns:repeat(2,1fr)}.hcols{grid-template-columns:1fr}}
+  .daylist{margin-top:14px}
+  .daylist h3{font-size:15px;margin:0 0 8px}
+  .daylist ul{list-style:none;margin:0;padding:0}
+  .daylist li{padding:11px 16px;font-size:15px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+  .daylist li:last-child{border-bottom:none}
+  .daylist .meta{color:var(--muted);font-size:12px}
+  @media (max-width:640px){main{padding:14px} header{padding:12px 14px} nav{margin-left:0;width:100%}}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Competitor Content Tracker</h1>
+    <div class="sub">Zoho CRM vs competitors · new pages by content category</div>
+  </div>
+  <span class="sample" id="sampleTag">Sample data – for layout review only</span>
+  <div class="upd" id="upd"></div>
+  <nav>
+    <a href="#compare" id="nav-compare">Category comparison</a>
+    <a href="#daily" id="nav-daily">Daily view</a>
+    <a href="#habits" id="nav-habits">Competitor habits</a>
+    <a href="#pages" id="nav-pages">Page list</a>
+  </nav>
+</header>
+
+<div class="updPanel hidden" id="updPanel">
+  <div class="updHead"><span class="spin" id="updSpin"></span><b id="updStep">Updating…</b><span class="gap" id="updCount"></span>
+    <span style="flex:1"></span><button id="updHide">Hide</button></div>
+  <pre id="updLog"></pre>
+</div>
+<main>
+  <!-- ============ SCREEN 1: CATEGORY COMPARISON ============ -->
+  <section id="view-compare">
+    <div class="bar">
+      <h2>Category comparison</h2>
+      <select id="month" aria-label="Month"></select>
+      <span class="period" id="period"></span>
+      <span style="flex:1"></span>
+      <span class="alert" id="lowAlert"></span>
+    </div>
+
+    <div class="cards" id="cards"></div>
+
+    <div class="note">Counts show <b>where competitors are focusing</b>, not what Zoho CRM must match. A category with fewer pages can still be the right call.</div>
+
+    <div class="chips" id="chips"></div>
+
+    <div class="panel"><div class="scroll">
+      <table id="cmp"><thead></thead><tbody></tbody></table>
+    </div></div>
+    <div class="help">Click a category to open its day-by-day view for this month.</div>
+
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <!-- ============ SCREEN 2: DAILY 1–30 VIEW ============ -->
+  <section id="view-daily" class="hidden">
+    <div class="bar">
+      <h2>Daily view</h2>
+      <select id="dCat" aria-label="Category"></select>
+      <select id="dMonth" aria-label="Month"></select>
+      <span class="period" id="dPeriod"></span>
+      <span style="flex:1"></span>
+      <div class="seg" id="dMode"><button data-m="calendar">Calendar</button><button data-m="grid">Grid (1–30)</button></div>
+      <div class="scale" id="dScale">Fewer <i style="background:#fff"></i><i id="sc1"></i><i id="sc2"></i><i id="sc3"></i><i id="sc4"></i> More</div>
+    </div>
+    <div class="panel" id="calWrap"><div class="scroll"><div class="cal" id="cal"></div></div></div>
+    <div class="panel" id="gridWrap"><div class="scroll">
+      <table id="daily"><thead></thead><tbody></tbody></table>
+    </div></div>
+    <div class="help" id="dHelp"></div>
+    <div class="daylist panel hidden" id="dayList"></div>
+  </section>
+
+  <!-- ============ COMPETITOR HABITS ============ -->
+  <section id="view-habits" class="hidden">
+    <div class="bar">
+      <h2>Competitor habits</h2>
+      <select id="hPeriod" aria-label="Period">
+        <option value="30" selected>Last 30 days</option>
+        <option value="60">Last 60 days</option>
+        <option value="90">Last 90 days</option>
+      </select>
+      <span class="period" id="hRange"></span>
+    </div>
+    <div class="panel"><div class="scroll"><table id="habTable"><thead></thead><tbody></tbody></table></div></div>
+    <div class="help" id="hHelp"></div>
+    <div class="hcards hidden" id="hCards"></div>
+
+    <h3 style="margin:28px 0 4px;font-size:17px">What their pages ask readers to do</h3>
+    <div class="help" style="margin:0 0 12px">Share of each company's pages (same period) that include each call to action. A page can have more than one. "Pages" counts only pages the collector has opened and checked.</div>
+    <div class="ctaNotes" id="ctaNotes"></div>
+    <div class="panel"><div class="scroll"><table id="ctaTable"><thead></thead><tbody></tbody></table></div></div>
+  </section>
+
+  <!-- ============ SCREEN 5: PAGE LIST ============ -->
+  <section id="view-pages" class="hidden">
+    <div class="bar">
+      <h2>Page list</h2>
+      <span style="flex:1"></span>
+      <button id="resetEdits" title="Undo every category change you made in this browser">Undo my category changes</button>
+    </div>
+    <div class="filters">
+      <input type="text" id="q" placeholder="Search titles or links…">
+      <select id="fCo"></select>
+      <select id="fCat"></select>
+      <select id="fCta"></select>
+      <select id="fConf">
+        <option value="">Any confidence</option>
+        <option value="Low">Low – needs a check</option>
+        <option value="High">High</option>
+      </select>
+      <label>From <input type="date" id="fFrom"></label>
+      <label>To <input type="date" id="fTo"></label>
+      <button id="clear">Clear filters</button>
+    </div>
+    <div class="count" id="count"></div>
+    <div class="panel">
+      <div class="scroll"><table id="pl"><thead><tr>
+        <th>Published</th><th>Company</th><th>Title</th><th>Category</th><th>Asks reader to</th><th>Confidence</th><th>Set by</th>
+      </tr></thead><tbody></tbody></table></div>
+      <div class="pager"><button id="prev">‹ Prev</button><span id="pageInfo"></span><button id="next">Next ›</button></div>
+    </div>
+    <div class="help">Changing a category marks it as a manual choice, which always wins over the AI. In this prototype, changes are kept in your browser only; from Phase 2 they are saved for the whole team.</div>
+  </section>
+</main>
+
+<script src="config.js"></script>
+<script src="data.js"></script>
+<script>
+(function(){
+  const CFG = window.TRACKER_CONFIG, DATA = window.TRACKER_DATA;
+  const BASE = CFG.baseline;
+  const COMPANIES = CFG.companies;
+  const COMPETITORS = COMPANIES.filter(c=>c.role!=="baseline").map(c=>c.name);
+  const CATS = CFG.categories.map(c=>c.name);
+  const MULT = CFG.thresholds.bigGapMultiple;
+  const AS_OF = DATA.asOf; // YYYY-MM-DD, IST
+  const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const SHORT = MONTHS.map(m=>m.slice(0,3));
+  if(!DATA.isSample) document.getElementById("sampleTag").remove();
+
+  const esc = s => String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const color = name => (COMPANIES.find(c=>c.name===name)||{}).color || "#999";
+  const fmtDate = iso => { const [y,m,d]=iso.split("-"); return `${+d} ${SHORT[+m-1]} ${y}`; };
+  const monthLabel = key => { const [y,m]=key.split("-"); return `${MONTHS[+m-1]} ${y}`; };
+  const daysIn = key => { const [y,m]=key.split("-").map(Number); return new Date(y,m,0).getDate(); };
+  const prevKey = key => { let [y,m]=key.split("-").map(Number); m--; if(!m){m=12;y--;} return `${y}-${String(m).padStart(2,"0")}`; };
+
+  /* ---- manual category overrides (browser-only in Phase 1) ---- */
+  let overrides = {};
+  try { overrides = JSON.parse(localStorage.getItem("cct-overrides")||"{}"); } catch(e){}
+  const saveOverrides = () => { try { localStorage.setItem("cct-overrides", JSON.stringify(overrides)); } catch(e){} };
+  const pages = () => DATA.pages.map(p => overrides[p.url] ? {...p, category: overrides[p.url], setBy:"Manual"} : p);
+
+  /* ---- status rules (from the spec) ---- */
+  const STATUS = {
+    missing:{label:"Missing",cls:"s-missing",order:0,desc:"At least one competitor published, Zoho CRM published 0"},
+    gap:{label:"Big gap",cls:"s-gap",order:1,desc:`Top competitor published ${MULT}x or more than Zoho CRM`},
+    behind:{label:"Behind leader",cls:"s-behind",order:2,desc:"Zoho CRM published, but less than the top competitor"},
+    comp:{label:"Competitive",cls:"s-comp",order:3,desc:"Zoho CRM equals or beats the top competitor"},
+    none:{label:"No activity",cls:"s-none",order:4,desc:"Nobody published in this category this month"}
+  };
+  function statusOf(zoho, top){
+    if(top===0 && zoho===0) return "none";
+    if(zoho===0) return "missing";
+    if(top >= MULT*zoho) return "gap";
+    if(zoho < top) return "behind";
+    return "comp";
+  }
+
+  /* ---- month selector ---- */
+  const monthKeys = [...new Set(DATA.pages.map(p=>p.published.slice(0,7)))].sort().reverse();
+  const curKey = AS_OF.slice(0,7);
+  if(!monthKeys.includes(curKey)) monthKeys.unshift(curKey);
+  const monthSel = document.getElementById("month");
+  monthSel.innerHTML = monthKeys.map(k=>`<option value="${k}">${monthLabel(k)}${k===curKey?" (so far)":""}</option>`).join("");
+  monthSel.value = curKey;
+
+  let hiddenStatuses = new Set();
+
+  function renderCompare(){
+    const key = monthSel.value, all = pages();
+    const partial = key===curKey;
+    const lastDay = partial ? +AS_OF.slice(8,10) : daysIn(key);
+    document.getElementById("period").textContent = partial
+      ? `so far (up to ${fmtDate(AS_OF)})` : `full month (1–${lastDay})`;
+
+    const inMonth = all.filter(p=>p.published.startsWith(key));
+    // comparison window in previous month: same number of days
+    const pk = prevKey(key), pDays = Math.min(lastDay, daysIn(pk));
+    const inPrev = all.filter(p=>p.published.startsWith(pk) && +p.published.slice(8,10) <= pDays);
+
+    // summary cards
+    document.getElementById("cards").innerHTML = COMPANIES.map(c=>{
+      const n = inMonth.filter(p=>p.company===c.name).length;
+      const before = inPrev.filter(p=>p.company===c.name).length;
+      let chg = "";
+      if(monthKeys.includes(pk) || before){
+        const diff = n - before;
+        const pct = before ? Math.round(diff/before*100) : null;
+        const cls = diff>0?"up":diff<0?"down":"";
+        const arrow = diff>0?"▲":diff<0?"▼":"■";
+        chg = `<span class="${cls}">${arrow} ${pct===null? (diff>0?"+"+diff:diff) : Math.abs(pct)+"%"}</span> vs ${SHORT[+pk.slice(5)-1]} 1–${pDays}`;
+      }
+      return `<div class="card ${c.role==="baseline"?"base":""}"><div class="co"><span class="dot" style="background:${c.color}"></span>${esc(c.name)}</div>
+        <div class="num">${n}</div><div class="chg">${chg||"new pages this month"}</div></div>`;
+    }).join("");
+
+    // low-confidence alert
+    const low = inMonth.filter(p=>p.confidence==="Low" && p.setBy!=="Manual").length;
+    const la = document.getElementById("lowAlert");
+    la.textContent = low ? `⚑ ${low} page${low>1?"s":""} need a quick category check` : "";
+    la.style.display = low ? "" : "none";
+    la.onclick = () => openPages({conf:"Low", from:`${key}-01`, to:`${key}-${String(daysIn(key)).padStart(2,"0")}`});
+
+    // table rows
+    const rows = CATS.map(cat=>{
+      const counts = {};
+      COMPANIES.forEach(c=> counts[c.name] = inMonth.filter(p=>p.company===c.name && p.category===cat).length);
+      const top = Math.max(0, ...COMPETITORS.map(n=>counts[n]));
+      const leader = top ? COMPETITORS.filter(n=>counts[n]===top) : [];
+      const st = statusOf(counts[BASE], top);
+      return {cat, counts, top, leader, st};
+    }).sort((a,b)=> STATUS[a.st].order - STATUS[b.st].order || (b.top - b.counts[BASE]) - (a.top - a.counts[BASE]) || (a.cat==="Other") - (b.cat==="Other"));
+
+    // status chips
+    document.getElementById("chips").innerHTML = Object.entries(STATUS).map(([k,s])=>{
+      const n = rows.filter(r=>r.st===k).length;
+      return `<span class="chip ${s.cls} ${hiddenStatuses.has(k)?"off":""}" data-st="${k}" title="Click to show/hide">${s.label} · ${n}</span>`;
+    }).join("");
+    document.querySelectorAll("#chips .chip").forEach(ch=>ch.onclick=()=>{
+      const k = ch.dataset.st; hiddenStatuses.has(k)?hiddenStatuses.delete(k):hiddenStatuses.add(k); renderCompare();
+    });
+
+    const thead = `<tr><th>Category</th>${COMPANIES.map(c=>`<th class="n ${c.role==="baseline"?"base":""}"><span class="dot" style="background:${c.color};margin-right:6px"></span>${esc(c.name)}</th>`).join("")}<th>Gap to leader</th><th>Status</th></tr>`;
+    document.querySelector("#cmp thead").innerHTML = thead;
+    document.querySelector("#cmp tbody").innerHTML = rows.filter(r=>!hiddenStatuses.has(r.st)).map(r=>{
+      const z = r.counts[BASE];
+      let gap = "—";
+      if(r.top > z) gap = `${r.top - z} behind ${esc(r.leader.join(" & "))}` + (z ? ` (${(r.top/z).toFixed(1)}x)` : "");
+      else if(r.top && z > r.top) gap = `${z - r.top} ahead`;
+      else if(r.top && z === r.top) gap = "level";
+      const covers = (CFG.categories.find(c=>c.name===r.cat)||{}).covers||"";
+      return `<tr data-cat="${esc(r.cat)}"><td><div class="catname" title="${esc(covers)}">${esc(r.cat)}</div></td>
+        ${COMPANIES.map(c=>{
+          const n = r.counts[c.name], isLead = r.leader.includes(c.name);
+          return `<td class="n ${c.role==="baseline"?"base":""} ${n===0?"zero":""} ${isLead?"lead":""}">${n}</td>`;}).join("")}
+        <td class="gap">${gap}</td>
+        <td><span class="status ${STATUS[r.st].cls}">${STATUS[r.st].label}</span></td></tr>`;
+    }).join("") || `<tr><td colspan="${COMPANIES.length+3}" class="gap">No categories match the selected statuses.</td></tr>`;
+
+    document.querySelectorAll("#cmp tbody tr[data-cat]").forEach(tr=>tr.onclick=()=>{
+      dCat.value = tr.dataset.cat; dMonth.value = key; selCell = null; location.hash = "daily"; });
+
+    document.getElementById("legend").innerHTML = Object.values(STATUS).map(s=>
+      `<div><span class="status ${s.cls}">${s.label}</span> ${esc(s.desc)}</div>`).join("");
+  }
+  monthSel.onchange = renderCompare;
+
+  /* ---- daily 1–30 view ---- */
+  const dCat = document.getElementById("dCat"), dMonth = document.getElementById("dMonth");
+  const ALL = "__all__";
+  dCat.innerHTML = `<option value="${ALL}">All categories</option>` + CATS.map(c=>`<option>${esc(c)}</option>`).join("");
+  dMonth.innerHTML = monthSel.innerHTML; dMonth.value = curKey;
+  let selCell = null; // {co, day} — co is null when a whole calendar day is clicked
+  let dMode = "calendar";
+  document.querySelectorAll("#dMode button").forEach(b=>b.onclick=()=>{ dMode=b.dataset.m; selCell=null; renderDaily(); });
+  const HEAT = "23,92,211"; // blue
+  const shade = (n,max) => { if(!n) return ""; const a = 0.14 + 0.86*Math.min(1, n/max);
+    return `background:rgba(${HEAT},${a.toFixed(2)});color:${a>0.55?"#fff":"#1d2433"}`; };
+  [1,2,3,4].forEach(i=>document.getElementById("sc"+i).style.background=`rgba(${HEAT},${(0.14+0.86*i/4).toFixed(2)})`);
+
+  function renderDaily(){
+    const key = dMonth.value, cat = dCat.value, [y,m] = key.split("-").map(Number);
+    const nDays = daysIn(key), partial = key===curKey, today = +AS_OF.slice(8,10);
+    document.getElementById("dPeriod").textContent = partial ? `so far (up to ${fmtDate(AS_OF)})` : `full month`;
+    const list = pages().filter(p=>p.published.startsWith(key) && (cat===ALL || p.category===cat));
+    const grid = {}; COMPANIES.forEach(c=>grid[c.name]=Array(nDays+1).fill(0));
+    list.forEach(p=>{ if(grid[p.company]) grid[p.company][+p.published.slice(8,10)]++; });
+    const max = Math.max(1, ...COMPANIES.flatMap(c=>grid[c.name].slice(1)));
+    const days = Array.from({length:nDays},(_,i)=>i+1);
+    const wd = d => new Date(y, m-1, d).getDay();
+    const isWe = d => wd(d)===0 || wd(d)===6;
+    const isFuture = d => partial && d > today;
+
+    const isCal = dMode==="calendar";
+    document.querySelectorAll("#dMode button").forEach(b=>b.classList.toggle("on", b.dataset.m===dMode));
+    document.getElementById("calWrap").classList.toggle("hidden", !isCal);
+    document.getElementById("gridWrap").classList.toggle("hidden", isCal);
+    document.getElementById("dScale").style.display = isCal ? "none" : "";
+    document.getElementById("dHelp").textContent = isCal
+      ? "Each day lists how many pages each company published. Each row is one week, with the week's totals on the right. Striped days are still to come. Click a day to see its pages."
+      : "Each number is pages published that day. Grey columns are weekends; striped cells are days still to come. Click any cell to see those pages.";
+
+    if(isCal){
+      const lead = wd(1), cells = [];
+      for(let i=0;i<lead;i++) cells.push(null);
+      days.forEach(d=>cells.push(d));
+      while(cells.length%7) cells.push(null);
+      const tint = c => c + "1f";
+      let html = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(n=>`<div class="hd">${n}</div>`).join("") + `<div class="hd wk">Week total</div>`;
+      for(let w=0; w<cells.length/7; w++){
+        const week = cells.slice(w*7, w*7+7);
+        week.forEach(d=>{
+          if(d===null){ html += `<div class="day out"></div>`; return; }
+          const isToday = partial && d===today;
+          if(isFuture(d)){ html += `<div class="day future"><div class="top"><span></span><span class="dn">${d}</span></div></div>`; return; }
+          const tot = COMPANIES.reduce((a,c)=>a+grid[c.name][d],0);
+          const sel = selCell && !selCell.co && selCell.day===d;
+          const evs = COMPANIES.filter(c=>grid[c.name][d]).map(c=>
+            `<div class="ev" style="background:${tint(c.color)}"><span class="dot" style="background:${c.color}"></span><span class="nm">${esc(c.name)}</span><b>${grid[c.name][d]}</b></div>`).join("");
+          html += `<div class="day ${isWe(d)?"we":""} ${sel?"sel":""}" data-day="${d}" title="Click to see the pages published on ${d} ${SHORT[m-1]}">
+            <div class="top"><span class="tot">${tot? tot+" page"+(tot>1?"s":"") : ""}</span><span class="dn ${isToday?"today":""}">${d}</span></div>${evs}</div>`;
+        });
+        const inMonth = week.filter(d=>d!==null && !isFuture(d));
+        const first = week.find(d=>d!==null), last = [...week].reverse().find(d=>d!==null);
+        const stillGoing = week.some(d=>d!==null && isFuture(d));
+        if(!inMonth.length){ html += `<div class="wk"><div class="lbl">${first}–${last} ${SHORT[m-1]}</div><span class="meta" style="color:var(--muted)">Still to come</span></div>`; continue; }
+        const wk = COMPANIES.map(c=>({c, n: inMonth.reduce((a,d)=>a+grid[c.name][d],0)}));
+        const compTop = Math.max(0, ...wk.filter(x=>x.c.role!=="baseline").map(x=>x.n));
+        html += `<div class="wk"><div class="lbl">${first}–${last} ${SHORT[m-1]}${stillGoing?" (so far)":""}</div>${wk.map(x=>
+          `<div class="r ${x.c.role==="baseline"?"base":""}"><span><span class="dot" style="background:${x.c.color};margin-right:6px"></span>${esc(x.c.name)}</span><span class="${x.c.role==="baseline"&&x.n===0&&compTop>0?"z":""}">${x.n}</span></div>`).join("")}</div>`;
+      }
+      document.getElementById("cal").innerHTML = html;
+      document.querySelectorAll("#cal .day[data-day]").forEach(el=>el.onclick=()=>{
+        selCell = {co:null, day:+el.dataset.day}; renderDaily();
+        document.getElementById("dayList").scrollIntoView({behavior:"smooth", block:"nearest"});
+      });
+    }
+
+    document.querySelector("#daily thead").innerHTML = `<tr><th class="co">Company</th>${days.map(d=>
+      `<th class="d ${isWe(d)?"we":""}">${d}<small>${"SMTWTFS"[wd(d)]}</small></th>`).join("")}<th class="tot">Total</th></tr>`;
+
+    const rows = COMPANIES.map(c=>{
+      const g = grid[c.name], total = g.reduce((a,b)=>a+b,0);
+      return `<tr class="${c.role==="baseline"?"base":""}"><td class="co"><span class="dot" style="background:${c.color};margin-right:6px"></span>${esc(c.name)}</td>
+        ${days.map(d=>{
+          if(isFuture(d)) return `<td class="c future" title="Not happened yet"></td>`;
+          const n = g[d], sel = selCell && selCell.co===c.name && selCell.day===d;
+          return `<td class="c ${!n&&isWe(d)?"we":""} ${sel?"sel":""}" data-co="${esc(c.name)}" data-day="${d}" style="${shade(n,max)}" title="${esc(c.name)} · ${d} ${SHORT[m-1]}: ${n} page${n===1?"":"s"}">${n||""}</td>`;
+        }).join("")}<td class="tot">${total}</td></tr>`;
+    }).join("");
+    const dayTotals = days.map(d=>COMPANIES.reduce((a,c)=>a+grid[c.name][d],0));
+    const sum = `<tr class="sum"><td class="co">All companies</td>${days.map((d,i)=>
+      isFuture(d) ? `<td class="c future"></td>` : `<td class="c ${isWe(d)?"we":""}">${dayTotals[i]||""}</td>`).join("")}<td class="tot">${list.length}</td></tr>`;
+    document.querySelector("#daily tbody").innerHTML = rows + sum;
+
+    document.querySelectorAll("#daily td.c[data-co]").forEach(td=>td.onclick=()=>{
+      selCell = {co: td.dataset.co, day: +td.dataset.day}; renderDaily();
+      document.getElementById("dayList").scrollIntoView({behavior:"smooth", block:"nearest"});
+    });
+
+    // pages for the clicked cell
+    const box = document.getElementById("dayList");
+    if(!selCell || selCell.day > nDays){ box.classList.add("hidden"); return; }
+    const iso = `${key}-${String(selCell.day).padStart(2,"0")}`;
+    const hits = list.filter(p=>(!selCell.co || p.company===selCell.co) && p.published===iso)
+      .sort((a,b)=>COMPANIES.findIndex(c=>c.name===a.company)-COMPANIES.findIndex(c=>c.name===b.company));
+    box.classList.remove("hidden");
+    box.innerHTML = `<div style="padding:12px 14px;border-bottom:1px solid var(--line)"><h3 style="margin:0">${selCell.co?esc(selCell.co):"All companies"} · ${fmtDate(iso)}
+      <span class="meta">· ${cat===ALL?"All categories":esc(cat)} · ${hits.length} page${hits.length===1?"":"s"}</span></h3></div>` +
+      (hits.length ? `<ul>${hits.map(p=>`<li><a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.title)}</a>
+        <span class="meta"><span class="dot" style="background:${color(p.company)};width:8px;height:8px;margin-right:4px"></span>${esc(p.company)}${cat===ALL?" · "+esc(p.category):""}${p.dateMissing?' · <span class="flag" style="margin:0">no publish date</span>':""}</span></li>`).join("")}</ul>`
+        : `<ul><li class="meta">No pages published that day.</li></ul>`);
+  }
+  dCat.onchange = ()=>{ selCell=null; renderDaily(); };
+  dMonth.onchange = ()=>{ selCell=null; renderDaily(); };
+
+  /* ---- page list ---- */
+  const el = id => document.getElementById(id);
+  el("fCo").innerHTML = `<option value="">All companies</option>` + COMPANIES.map(c=>`<option>${esc(c.name)}</option>`).join("");
+  el("fCat").innerHTML = `<option value="">All categories</option>` + CATS.map(c=>`<option>${esc(c)}</option>`).join("");
+  const CTAS = (CFG.ctaTypes||[]).map(c=>c.name);
+  el("fCta").innerHTML = `<option value="">Any call to action</option>` + CTAS.map(c=>`<option>${esc(c)}</option>`).join("") + `<option value="__none__">No call to action</option>`;
+  const PER = 50; let pageNo = 0;
+
+  function renderPages(){
+    const cta = el("fCta").value;
+    const q = el("q").value.trim().toLowerCase(), co = el("fCo").value, cat = el("fCat").value,
+          conf = el("fConf").value, from = el("fFrom").value, to = el("fTo").value;
+    const list = pages().filter(p=>
+      (!q || p.title.toLowerCase().includes(q) || p.url.toLowerCase().includes(q)) &&
+      (!co || p.company===co) && (!cat || p.category===cat) &&
+      (!cta || (cta==="__none__" ? Array.isArray(p.ctas) && !p.ctas.length : (p.ctas||[]).includes(cta))) &&
+      (!conf || (conf==="Low" ? p.confidence==="Low" && p.setBy!=="Manual" : p.confidence===conf || p.setBy==="Manual")) &&
+      (!from || p.published>=from) && (!to || p.published<=to));
+    const pagesCount = Math.max(1, Math.ceil(list.length/PER));
+    pageNo = Math.min(pageNo, pagesCount-1);
+    el("count").textContent = `Showing ${list.length} page${list.length===1?"":"s"}`;
+    el("pageInfo").textContent = `Page ${pageNo+1} of ${pagesCount}`;
+    el("prev").disabled = pageNo===0; el("next").disabled = pageNo>=pagesCount-1;
+    el("pl").querySelector("tbody").innerHTML = list.slice(pageNo*PER, pageNo*PER+PER).map(p=>`
+      <tr>
+        <td>${fmtDate(p.published)}${p.dateMissing?`<span class="flag" title="No publish date in the feed — using the date collected">no date</span>`:""}</td>
+        <td><span class="dot" style="background:${color(p.company)};margin-right:6px"></span>${esc(p.company)}</td>
+        <td class="title"><a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.title)}</a></td>
+        <td><select data-url="${esc(p.url)}">${CATS.map(c=>`<option ${c===p.category?"selected":""}>${esc(c)}</option>`).join("")}</select></td>
+        <td>${!Array.isArray(p.ctas) ? '<span class="gap">Not checked</span>' : p.ctas.length ? p.ctas.map(c=>`<span class="ctab">${esc(c)}</span>`).join("") : '<span class="gap">None</span>'}</td>
+        <td>${p.setBy==="Manual" ? `<span class="badge b-manual">Checked</span>` : `<span class="badge ${p.confidence==="Low"?"b-low":"b-high"}">${p.confidence}</span>`}</td>
+        <td><span class="badge ${p.setBy==="Manual"?"b-manual":"b-ai"}" title="${p.setBy==="Rules"?"Quick keyword guess, waiting for AI or a person to confirm":""}">${p.setBy==="Rules"?"Keyword guess":p.setBy}</span></td>
+      </tr>`).join("") || `<tr><td colspan="7" class="gap">No pages match these filters.</td></tr>`;
+    el("pl").querySelectorAll("select[data-url]").forEach(s=>s.onchange=()=>{
+      overrides[s.dataset.url] = s.value; saveOverrides(); renderPages(); renderCompare();
+    });
+  }
+  ["q","fCo","fCat","fCta","fConf","fFrom","fTo"].forEach(id=>el(id).addEventListener("input",()=>{pageNo=0;renderPages();}));
+  el("prev").onclick=()=>{pageNo--;renderPages();}; el("next").onclick=()=>{pageNo++;renderPages();};
+  el("clear").onclick=()=>{["q","fCo","fCat","fCta","fConf","fFrom","fTo"].forEach(id=>el(id).value="");pageNo=0;renderPages();};
+  el("resetEdits").onclick=()=>{overrides={};saveOverrides();renderPages();renderCompare();};
+
+
+  const listJoin = a => a.length<=1 ? (a[0]||"") : a.slice(0,-1).join(", ") + " and " + a[a.length-1];
+  /* ---- competitor habits: what each competitor is doing and what to do about it ---- */
+  const hPeriod = el("hPeriod");
+  const toDate = iso => { const [a,b,c]=iso.split("-").map(Number); return new Date(a,b-1,c); };
+  const isoOf = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  const DAY = 86400000;
+  const countBy = ps => { const o={}; CATS.forEach(c=>o[c]=0); ps.forEach(p=>o[p.category]++); return o; };
+
+  function renderHabits(){
+    const n = +hPeriod.value, to = AS_OF, from = isoOf(new Date(toDate(to)-(n-1)*DAY));
+    const pTo = isoOf(new Date(toDate(from)-DAY)), pFrom = isoOf(new Date(toDate(from)-n*DAY));
+    const earliest = DATA.pages.reduce((a,p)=>p.published<a?p.published:a, AS_OF);
+    const hasPrev = pFrom >= earliest;
+    el("hRange").textContent = `${fmtDate(from)} – ${fmtDate(to)}`;
+    el("hHelp").textContent = hasPrev
+      ? `"Rising topic" compares with the ${n} days before (${fmtDate(pFrom)} – ${fmtDate(pTo)}). Counts show focus, not quality.`
+      : `Not enough earlier data to compare with the previous ${n} days, so rising topics are hidden. Pick a shorter period.`;
+    const all = pages();
+    const inWin = all.filter(p=>p.published>=from && p.published<=to);
+    const inPrev = all.filter(p=>p.published>=pFrom && p.published<=pTo);
+    const zNow = countBy(inWin.filter(p=>p.company===BASE));
+    const compNow = {}; COMPETITORS.forEach(c=>compNow[c]=countBy(inWin.filter(p=>p.company===c)));
+    const real = CATS.filter(c=>c!=="Other");
+
+    const info = COMPANIES.map(c=>{
+      const mine = inWin.filter(p=>p.company===c.name), now = countBy(mine), prev = countBy(inPrev.filter(p=>p.company===c.name));
+      const prevTotal = inPrev.filter(p=>p.company===c.name).length;
+      const focus = real.map(k=>[k,now[k]]).sort((a,b)=>b[1]-a[1])[0];
+      const shifts = real.map(k=>({k, now:now[k], prev:prev[k], d:now[k]-prev[k]}));
+      const rising = hasPrev ? shifts.filter(x=>x.d>=2).sort((a,b)=>b.d-a.d)[0] : null;
+      let gap = null, lead = [], behind = null;
+      if(c.role!=="baseline"){
+        gap = real.map(k=>({k, them:now[k], z:zNow[k], d:now[k]-zNow[k]})).filter(x=>x.d>0).sort((a,b)=>b.d-a.d)[0] || null;
+      } else {
+        lead = real.filter(k=>zNow[k]>0 && COMPETITORS.every(cc=>zNow[k]>=compNow[cc][k]));
+        behind = real.map(k=>{ const top = Math.max(...COMPETITORS.map(cc=>compNow[cc][k])); return {k, top, z:zNow[k], d:top-zNow[k],
+          who: COMPETITORS.filter(cc=>compNow[cc][k]===top)}; }).filter(x=>x.d>0).sort((a,b)=>b.d-a.d)[0] || null;
+      }
+      // action sentence
+      let todo;
+      if(c.role==="baseline"){
+        todo = (behind ? `Biggest gap right now: <b>${esc(behind.k)}</b>. ${esc(listJoin(behind.who))} published ${behind.top}, Zoho CRM ${behind.z}. Make this the next content priority.` : `Zoho CRM is level with or ahead of every competitor in every category.`)
+          + (lead.length ? ` Zoho CRM leads in ${esc(listJoin(lead.slice(0,3)))}: keep that going.` : "");
+      } else if(rising && zNow[rising.k] < rising.now){
+        todo = `${esc(c.name)} is ramping up <b>${esc(rising.k)}</b> (${rising.prev} → ${rising.now} pages). Zoho CRM published ${zNow[rising.k]}. Worth planning content on this.`;
+      } else if(gap){
+        todo = `${esc(c.name)} out-publishes Zoho CRM most in <b>${esc(gap.k)}</b> (${gap.them} vs ${gap.z}). Check which of these topics Zoho CRM has no page for.`;
+      } else {
+        todo = `No clear gap: Zoho CRM is matching ${esc(c.name)} in every category.`;
+      }
+      const readCat = c.role==="baseline" ? null : (rising && zNow[rising.k] < rising.now ? rising.k : gap ? gap.k : focus && focus[0]);
+      const reads = readCat ? mine.filter(p=>p.category===readCat).sort((a,b)=>b.published.localeCompare(a.published)).slice(0,3) : [];
+      return {c, total: mine.length, prevTotal, perWeek: mine.length/(n/7), focus, shifts, rising, gap, behind, lead, todo, readCat, reads};
+    });
+
+    const f1 = x => x>=10 ? Math.round(x) : x.toFixed(1);
+    const chgCell = x => { if(!hasPrev) return "—"; const d = x.total - x.prevTotal; const pct = x.prevTotal ? Math.round(d/x.prevTotal*100) : null;
+      return `<span class="${d>0?"up":d<0?"down":""}">${d>0?"▲":d<0?"▼":"■"} ${pct===null?(d>0?"+"+d:d):Math.abs(pct)+"%"}</span>`; };
+
+    el("habTable").querySelector("thead").innerHTML = `<tr><th>Company</th><th class="n">Pages / week</th><th class="n" title="Compared with the previous period of the same length">Change</th><th>Main focus</th><th>Rising topic</th><th>Biggest gap vs Zoho CRM</th></tr>`;
+    el("habTable").querySelector("tbody").innerHTML = info.map(x=>{
+      const base = x.c.role==="baseline";
+      const focus = x.focus && x.focus[1] ? `${esc(x.focus[0])} <span class="gap">(${Math.round(x.focus[1]/x.total*100)}%)</span>` : "—";
+      const rise = x.rising ? `${esc(x.rising.k)} <span class="up" style="white-space:nowrap">${x.rising.prev} → ${x.rising.now}</span>` : "—";
+      const gap = base ? (x.behind ? `${esc(x.behind.k)} <span class="gap" style="white-space:nowrap">(${x.behind.z} vs ${x.behind.top})</span>` : "—")
+                       : (x.gap ? `${esc(x.gap.k)} <span class="gap" style="white-space:nowrap">(${x.gap.them} vs ${x.gap.z})</span>` : "None");
+      return `<tr><td class="${base?"base":""}"><span class="dot" style="background:${x.c.color};margin-right:6px"></span><b>${esc(x.c.name)}</b></td>
+        <td class="n"><b>${f1(x.perWeek)}</b></td><td class="n">${chgCell(x)}</td>
+        <td class="wrap">${focus}</td><td class="wrap">${rise}</td><td class="wrap">${gap}</td></tr>`;
+    }).join("");
+
+    el("hCards").innerHTML = [].map(x=>{
+      const base = x.c.role==="baseline";
+      const shifts = hasPrev ? x.shifts.filter(s=>s.d!==0).sort((a,b)=>b.d-a.d) : [];
+      const shiftHtml = !hasPrev ? `<div class="gap">Needs an earlier period to compare.</div>`
+        : shifts.length ? shifts.map(s=>`<div class="shift"><span class="nm" title="${esc(s.k)}">${esc(s.k)}</span><span class="v">${s.prev} → ${s.now}</span><b class="${s.d>0?"up":"down"}">${s.d>0?"+":""}${s.d}</b></div>`).join("")
+        : `<div class="gap">No change from the previous period.</div>`;
+      const readsHtml = base
+        ? (x.lead.length ? `<div style="font-size:13px">${x.lead.map(k=>`<div style="padding:4px 0">✓ ${esc(k)}</div>`).join("")}</div>` : `<div class="gap">No category where Zoho CRM leads yet.</div>`)
+        : x.reads.length ? `<div class="reads">${x.reads.map(p=>`<a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.title)}<span class="d">${fmtDate(p.published)}</span></a>`).join("")}</div>
+             <a href="#" class="seeall" data-co="${esc(x.c.name)}" data-cat="${esc(x.readCat)}" style="display:inline-block;margin-top:8px;font-size:13px">See all ${esc(x.c.name)} pages in ${esc(x.readCat)} →</a>`
+        : `<div class="gap">No pages to suggest.</div>`;
+      return `<div class="hcard ${base?"base":""}">
+        <h3><span class="dot" style="background:${x.c.color}"></span>${esc(x.c.name)}${base?' <span class="gap" style="font-weight:500">(baseline)</span>':""}
+          <span class="gap" style="margin-left:auto;font-weight:500">${x.total} pages · ${f1(x.perWeek)}/week</span></h3>
+        <div class="todo">${x.todo}</div>
+        <h4 style="margin:0 0 8px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.02em">Topics moving up or down · ${fmtDate(from)} – ${fmtDate(to)} vs ${fmtDate(pFrom)} – ${fmtDate(pTo)}</h4>
+        <div style="max-width:520px">${shiftHtml}</div>
+        </div></div>`;
+    }).join("");
+    // ---- calls to action ----
+    const ctaTypes = (CFG.ctaTypes||[]).map(c=>c.name);
+    const ctaRows = COMPANIES.map(c=>{
+      const ps = inWin.filter(p=>p.company===c.name && Array.isArray(p.ctas)), n = ps.length;  // only pages that were opened and checked
+      const pct = {}; ctaTypes.forEach(t=> pct[t] = n ? Math.round(ps.filter(p=>(p.ctas||[]).includes(t)).length/n*100) : 0);
+      pct.__none__ = n ? Math.round(ps.filter(p=>!(p.ctas||[]).length).length/n*100) : 0;
+      return {c, n, pct};
+    });
+    const ctaCols = [...ctaTypes, "__none__"];
+    el("ctaTable").querySelector("thead").innerHTML = `<tr><th>Company</th><th class="n">Pages</th>${ctaCols.map(t=>`<th class="c">${t==="__none__"?"No call to action":esc(t)}</th>`).join("")}</tr>`;
+    el("ctaTable").querySelector("tbody").innerHTML = ctaRows.map(r=>{
+      const top = Math.max(...ctaTypes.map(t=>r.pct[t]));
+      return `<tr><td class="${r.c.role==="baseline"?"base":""}"><span class="dot" style="background:${r.c.color};margin-right:6px"></span><b>${esc(r.c.name)}</b></td><td class="n">${r.n}</td>
+        ${ctaCols.map(t=>{ const v = r.pct[t], a = t==="__none__" ? 0 : Math.min(1, v/80);
+          return `<td class="cell" style="cursor:pointer;${v&&a?`background:rgba(23,92,211,${(0.08+0.7*a).toFixed(2)});color:${a>0.6?"#fff":"#1d2433"}`:""}" data-co="${esc(r.c.name)}" data-cta="${esc(t)}" title="Click to see these pages">${r.n?v+"%":"—"}${t!=="__none__"&&v===top&&v>0?" ★":""}</td>`; }).join("")}</tr>`;
+    }).join("");
+    el("ctaTable").querySelectorAll("td.cell").forEach(td=>td.onclick=()=>openPages({co:td.dataset.co, cta:td.dataset.cta, from, to}));
+    // plain-language differences vs Zoho CRM
+    const z = ctaRows.find(r=>r.c.role==="baseline");
+    const notes = [];
+    ctaTypes.forEach(t=>{
+      const best = ctaRows.filter(r=>r.c.role!=="baseline").sort((a,b)=>b.pct[t]-a.pct[t])[0];
+      if(best && z && best.pct[t] - z.pct[t] >= 15) notes.push({d: best.pct[t]-z.pct[t], txt:
+        `<b>${esc(best.c.name)}</b> puts a <b>${esc(t.toLowerCase())}</b> on ${best.pct[t]}% of its pages. Zoho CRM: ${z.pct[t]}%.`});
+      if(best && z && z.pct[t] - best.pct[t] >= 10) notes.push({d: z.pct[t]-best.pct[t]-100, txt:
+        `Zoho CRM uses <b>${esc(t.toLowerCase())}</b> more than any competitor (${z.pct[t]}% vs ${best.pct[t]}%).`});
+    });
+    el("ctaNotes").innerHTML = notes.sort((a,b)=>b.d-a.d).slice(0,4).map(n=>`<div>${n.txt}</div>`).join("");
+
+    document.querySelectorAll("#hCards .seeall").forEach(a=>a.onclick=e=>{ e.preventDefault();
+      openPages({co:a.dataset.co, cat:a.dataset.cat, from, to}); });
+  }
+  hPeriod.onchange = renderHabits;
+  let selHab = null;
+  el("habTable").addEventListener("click", e=>{
+    const b = e.target.closest(".hbtn"); if(!b) return;
+    selHab = selHab===b.dataset.co ? null : b.dataset.co; renderHabits();
+    if(selHab) el("hCards").scrollIntoView({behavior:"smooth", block:"start"});
+  });
+
+  function openPages(f){
+    el("q").value=""; el("fCo").value=f.co||""; el("fCat").value=f.cat||""; el("fCta").value=f.cta||""; el("fConf").value=f.conf||"";
+    el("fFrom").value=f.from||""; el("fTo").value=f.to||""; pageNo=0;
+    location.hash = "pages";
+  }
+
+
+  /* ---- Update now (works when opened through the Competitor Tracker app) ---- */
+  (function(){
+    const box = el("upd"), panel = el("updPanel");
+    if(!DATA.live || !/^https?:/.test(location.protocol)){
+      if(!DATA.isSample) box.innerHTML = `Data as of ${fmtDate(AS_OF)} · open the <b>Competitor Tracker</b> app to update`;
+      return;
+    }
+    let timer = null, wasRunning = false;
+    const show = st => {
+      box.innerHTML = `<span>${st.lastUpdate ? "Last updated " + esc(st.lastUpdate) : "Not updated yet"}</span>
+        <button id="updBtn" ${st.running?"disabled":""}>${st.running?"Updating…":"Update now"}</button>`;
+      el("updBtn").onclick = start;
+      if(st.running || wasRunning){
+        panel.classList.remove("hidden");
+        el("updStep").textContent = st.error ? "Stopped: " + st.error : st.step || "Updating…";
+        el("updSpin").className = "spin" + (st.error ? " err" : !st.running ? " done" : "");
+        const opened = st.log.filter(l=>/^\s+\d+\/\d+/.test(l));
+        const last = opened[opened.length-1];
+        el("updCount").textContent = last ? "· page " + last.trim().split(/\s+/)[0] : "";
+        const log = el("updLog"); log.textContent = st.log.join("\n"); log.scrollTop = log.scrollHeight;
+      }
+      if(wasRunning && !st.running && !st.error){
+        el("updStep").textContent = "Done. Refreshing the dashboard…";
+        setTimeout(()=>location.reload(), 1200);
+      }
+      wasRunning = st.running;
+    };
+    const poll = async () => {
+      try { const st = await (await fetch("/api/status", {cache:"no-store"})).json(); show(st);
+        clearTimeout(timer); timer = setTimeout(poll, st.running ? 1000 : 15000);
+      } catch(e){ box.innerHTML = `<span>The Competitor Tracker app is closed. Double-click it again to update.</span>`; }
+    };
+    async function start(){
+      el("updBtn").disabled = true;
+      await fetch("/api/update", {method:"POST"}); wasRunning = true; poll();
+    }
+    el("updHide").onclick = () => panel.classList.add("hidden");
+    poll();
+  })();
+
+  /* ---- simple two-screen routing ---- */
+  function route(){
+    const v = ["#pages","#daily","#habits"].includes(location.hash) ? location.hash.slice(1) : "compare";
+    ["compare","daily","habits","pages"].forEach(n=>{
+      el("view-"+n).classList.toggle("hidden", v!==n);
+      el("nav-"+n).classList.toggle("on", v===n);
+    });
+    ({pages:renderPages, daily:renderDaily, habits:renderHabits, compare:renderCompare})[v]();
+    document.querySelector("main").classList.toggle("wide", v!=="compare");
+    window.scrollTo(0,0);
+  }
+  window.addEventListener("hashchange", route);
+  route();
+})();
+</script>
+</body>
+</html>
