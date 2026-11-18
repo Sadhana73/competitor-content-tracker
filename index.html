@@ -322,7 +322,15 @@
 <script src="config.js"></script>
 <script src="data.js"></script>
 <script>
+if(!window.TRACKER_DATA){
+  document.querySelector("main").innerHTML = `<div class="note" style="margin-top:30px;font-size:15px">This is the dashboard's template, without data.
+    To see the tracker, double-click <b>Competitor Tracker</b> in the competitor-content-tracker folder (or open <b>Competitor Content Tracker.html</b>).</div>`;
+  const t = document.getElementById("sampleTag"); if(t) t.remove();
+}
+</script>
+<script>
 (function(){
+  if(!window.TRACKER_DATA) return;
   const CFG = window.TRACKER_CONFIG, DATA = window.TRACKER_DATA;
   const BASE = CFG.baseline;
   const COMPANIES = CFG.companies;

@@ -26,25 +26,33 @@ window.TRACKER_CONFIG = {
       backupFeeds: [ "https://www.bing.com/news/search?q=site%3Ablog.hubspot.com&format=RSS",
                      "https://news.google.com/rss/search?q=site:blog.hubspot.com" ] },
     { name: "monday.com", role: "competitor", color: "#6161ff",
-      feeds: [ "https://monday.com/blog/feed/" ],
-      backupFeeds: [ "https://news.google.com/rss/search?q=site:monday.com/blog+when:7d",
-                     "https://www.bing.com/news/search?q=site%3Amonday.com%2Fblog&format=RSS" ] },
+      feeds: [],
+      sitemaps: [ { url: "https://monday.com/blog/sitemap_index.xml",
+                    include: ["monday\\.com/blog/"], exclude: ["/blog/(category|tag|author|page)/"] } ],
+      backupFeeds: [ "https://news.google.com/rss/search?q=site:monday.com/blog&hl=en-US&gl=US&ceid=US:en" ] },
     { name: "Pipedrive", role: "competitor", color: "#1a9e5c",
-      feeds: [ "https://www.pipedrive.com/en/blog/feed" ],
-      backupFeeds: [ "https://news.google.com/rss/search?q=site:pipedrive.com/en/blog+when:7d" ] },
+      feeds: [],
+      sitemaps: [ { url: "https://www.pipedrive.com/sitemaps/en-blog-pages.xml", include: ["/en/blog/"] } ],
+      backupFeeds: [ "https://news.google.com/rss/search?q=site:pipedrive.com/en/blog&hl=en-US&gl=US&ceid=US:en" ] },
     { name: "Salesforce", role: "competitor", color: "#0b76d1",
       feeds: [ "https://www.salesforce.com/blog/feed/" ],
       backupFeeds: [ "https://news.google.com/rss/search?q=site:salesforce.com/blog+when:7d",
                      "https://www.bing.com/news/search?q=site%3Asalesforce.com%2Fblog&format=RSS" ] },
     { name: "Brevo", role: "competitor", color: "#0b996e",
-      feeds: [ "https://www.brevo.com/blog/feed/" ],
-      backupFeeds: [ "https://news.google.com/rss/search?q=site:brevo.com/blog+when:7d" ] },
+      feeds: [],
+      sitemaps: [ { url: "https://www.brevo.com/sitemap_en.xml",
+                    include: ["^https://www\\.brevo\\.com/blog/"], exclude: ["/blog/(category|tag|author|page)/"] } ],
+      backupFeeds: [ "https://news.google.com/rss/search?q=site:brevo.com/blog&hl=en-US&gl=US&ceid=US:en" ] },
     { name: "The Hustle", role: "competitor", color: "#b8860b",
       feeds: [ "https://thehustle.co/news/rss.xml" ],
       backupFeeds: [ "https://www.bing.com/news/search?q=site%3Athehustle.co&format=RSS",
                      "https://news.google.com/rss/search?q=site:thehustle.co" ] },
     { name: "Zoho CRM", role: "baseline", color: "#e42527",
       feeds: [ "https://www.zoho.com/blog/crm/feed" ],
+      // English zoho.com/crm/ pages only; product help, developer docs, pricing and feature pages are left out
+      sitemaps: [ { url: "https://www.zoho.com/crm/sitemap.xml",
+                    include: ["^https://www\\.zoho\\.com/crm/"],
+                    exclude: ["/crm/(help|developer|kb|webinars?|events?|signup|pricing|compare|features|editions|demo|partners?|marketplace|mobile|security|terms|privacy|gdpr)", "/crm/.*(pricing|signup|login)"] } ],
       backupFeeds: [ "https://news.google.com/rss/search?q=site:zoho.com/blog/crm" ] }
   ],
 
@@ -64,6 +72,10 @@ window.TRACKER_CONFIG = {
     { name: "Customer stories",               covers: "Case studies, testimonials" },
     { name: "Other",                          covers: "Anything that fits none of the above" }
   ],
+
+  // Sitemap pages count only if the page's own publish date is within this many days
+  // (or, with no publish date, from the day the tracker first sees a brand-new address).
+  sitemapLookbackDays: 45,
 
   // Calls to action: what a page asks the reader to do.
   // "words" are what the collector looks for in buttons and links on each page (used from Phase 2).

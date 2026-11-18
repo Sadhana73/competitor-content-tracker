@@ -180,6 +180,60 @@ def guess_category(title, desc):
     return "Other"
 
 
+
+# ---------------------------------------------------------------- sitemaps
+SEEN = os.path.join(HERE, "data", "sitemap-seen.json")
+
+def read_sitemap(url, depth=0, child_include=None):
+    """Return list of (loc, lastmod-date or None). Follows a sitemap index one level down."""
+    xml, info = fetch(url, timeout=30)
+    if xml is None: return None, info
+    if "<sitemapindex" in xml and depth == 0:
+        out = []
+        for loc in re.findall(r"<loc>\s*(.*?)\s*</loc>", xml):
+            loc = html.unescape(loc)
+            if child_include and not re.search(child_include, loc): continue
+            got, _ = read_sitemap(loc, 1)
+            out += got or []
+        return out, "index"
+    out = []
+    for block in re.findall(r"<url>(.*?)</url>", xml, flags=re.S):
+        m = re.search(r"<loc>\s*(.*?)\s*</loc>", block)
+        if not m: continue
+        lm = re.search(r"<lastmod>\s*(.*?)\s*</lastmod>", block)
+        out.append((html.unescape(m.group(1)), to_ist_date(lm.group(1)) if lm else None))
+    return out, "urls"
+
+
+def sitemap_candidates(co, sm, known, seen, lookback, today):
+    """New or recently changed pages from one sitemap, to be checked by their real publish date."""
+    entries, info = read_sitemap(sm["url"], child_include=sm.get("childInclude"))
+    if entries is None: return [], f"{sm['url']} → {info[:80]}"
+    inc = [re.compile(x) for x in sm.get("include", [])]
+    exc = [re.compile(x) for x in sm.get("exclude", [])]
+    entries = [(u, d) for u, d in entries if (not inc or any(r.search(u) for r in inc)) and not any(r.search(u) for r in exc)]
+    key = co["name"] + " | " + sm["url"]
+    first_scan = key not in seen
+    before = set(seen.get(key, []))
+    since = (datetime.date.fromisoformat(today) - datetime.timedelta(days=lookback)).isoformat()
+    cands = []
+    for u, lm in entries:
+        nu = norm_url(u)
+        if nu in known: continue
+        is_new_url = (not first_scan) and nu not in before
+        recently_changed = lm is not None and lm >= since
+        if is_new_url or recently_changed:
+            cands.append((nu, lm, is_new_url))
+    seen[key] = sorted({norm_url(u) for u, _ in entries} | before)
+    cands.sort(key=lambda x: x[1] or "", reverse=True)
+    return cands[: sm.get("maxPerRun", 150)], None
+
+
+def title_from_url(u):
+    slug = urllib.parse.urlparse(u).path.rstrip("/").split("/")[-1]
+    slug = re.sub(r"\.(html?|php)$", "", slug)
+    return slug.replace("-", " ").strip().capitalize() or u
+
 # ---------------------------------------------------------------- step 1: feeds
 def step_feeds():
     cfg = load_config()
@@ -187,6 +241,7 @@ def step_feeds():
     known = {p["url"] for p in pages}
     known_titles = {(p["company"], p["title"].lower()) for p in pages}
     today = today_ist()
+    seen = json.load(open(SEEN)) if os.path.exists(SEEN) else {}
     report = []
     for co in cfg["companies"]:
         found, used, errors = [], "feeds", []
@@ -194,7 +249,21 @@ def step_feeds():
             xml, info = fetch(url)
             if xml is None: errors.append(f"{url} → {info[:80]}"); continue
             found += parse_feed(xml)
-        if not found:
+        sm_added = 0
+        for sm in co.get("sitemaps", []):
+            cands, err = sitemap_candidates(co, sm, known, seen, cfg.get("sitemapLookbackDays", 45), today)
+            if err: errors.append(err); continue
+            used = "feeds + sitemap" if found else "sitemap"
+            for nu, lm, is_new_url in cands:
+                pages.append({
+                    "url": nu, "title": title_from_url(nu), "company": co["name"],
+                    "published": lm or today, "dateMissing": True, "needsDate": True, "newInSitemap": is_new_url,
+                    "category": "Other", "confidence": "Low", "setBy": "Rules",
+                    "meta": "", "firstParagraph": "", "pageType": page_type(nu),
+                    "ctas": None, "collected": today, "viaNews": False, "enriched": False, "source": "sitemap",
+                })
+                known.add(nu); sm_added += 1
+        if not found and not sm_added and not co.get("sitemaps"):
             used = "backup"
             for url in co.get("backupFeeds", []):
                 xml, info = fetch(url)
@@ -218,10 +287,11 @@ def step_feeds():
                 "ctas": None, "collected": today, "viaNews": "news.google.com" in url, "enriched": False,
             })
             known.add(url); known_titles.add((co["name"], title.lower())); added += 1
-        line = f"{co['name']:<12} {len(found):>3} in feed · {added:>3} new · source: {used}" + \
+        line = f"{co['name']:<12} {len(found):>3} in feed · {added:>3} new" + (f" · {sm_added} sitemap pages to check" if co.get("sitemaps") else "") + f" · source: {used}" + \
                (f" · problems: {'; '.join(errors)}" if errors else "")
         report.append(line); print(line, flush=True)
     save_store(pages)
+    json.dump(seen, open(SEEN, "w"))
     print(f"\nTotal pages stored: {len(pages)}")
 
 
@@ -262,6 +332,7 @@ def step_enrich(limit=25, budget=150):
     cfg = load_config()
     pages = load_store()
     todo = [p for p in pages if not p.get("enriched") and not p.get("viaNews")]
+    todo.sort(key=lambda p: p.get("source") != "sitemap")      # check sitemap pages first
     start, done = time.time(), 0
     for p in todo[:limit]:
         if time.time() - start > budget: break
@@ -277,7 +348,20 @@ def step_enrich(limit=25, budget=150):
             m = re.search(r'"datePublished"\s*:\s*"([^"]+)"', doc)
             pub = m.group(1) if m else ""
         d = to_ist_date(pub)
-        if d:
+        if p.get("source") == "sitemap":
+            t = meta(doc, "og:title") or clean((re.search(r"<title[^>]*>(.*?)</title>", doc, flags=re.S | re.I) or [None, ""])[1])
+            if t: p["title"] = re.split(r"\s[|–-]\s(?=[^|–-]*$)", t)[0].strip()[:200]
+            since = (datetime.date.fromisoformat(today_ist()) - datetime.timedelta(days=cfg.get("sitemapLookbackDays", 45))).isoformat()
+            if d:
+                p["published"], p["dateMissing"] = d, False
+                if d < since and not p.get("newInSitemap"):
+                    p["exclude"] = "old page updated, not new"        # sitemap 'last modified' never counts as new
+            elif p.get("newInSitemap"):
+                p["published"], p["dateMissing"] = p["collected"], True  # first seen today, no publish date on the page
+            else:
+                p["exclude"] = "no publish date on the page"
+            p["needsDate"] = False
+        elif d:
             p["published"], p["dateMissing"] = d, False
         art = region(doc)
         for m in re.finditer(r"<p[^>]*>(.*?)</p>", art, flags=re.S | re.I):
