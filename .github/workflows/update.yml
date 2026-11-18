@@ -63,12 +63,12 @@ jobs:
           git commit -m "Daily update $(TZ=Asia/Kolkata date '+%Y-%m-%d %H:%M') IST" || echo "Nothing new"
           git push
 
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: site
       - id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
       - name: Close the request
         if: github.event_name == 'issues'
