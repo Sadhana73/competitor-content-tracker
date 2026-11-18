@@ -345,7 +345,8 @@
   let overrides = {};
   try { overrides = JSON.parse(localStorage.getItem("cct-overrides")||"{}"); } catch(e){}
   const saveOverrides = () => { try { localStorage.setItem("cct-overrides", JSON.stringify(overrides)); } catch(e){} };
-  const pages = () => DATA.pages.map(p => overrides[p.url] ? {...p, category: overrides[p.url], setBy:"Manual"} : p);
+  const counts = p => !p.exclude && !p.needsDate;   // old pages that were only updated, or not yet checked, never count
+  const pages = () => DATA.pages.filter(counts).map(p => overrides[p.url] ? {...p, category: overrides[p.url], setBy:"Manual"} : p);
 
   /* ---- status rules (from the spec) ---- */
   const STATUS = {
@@ -364,7 +365,7 @@
   }
 
   /* ---- month selector ---- */
-  const monthKeys = [...new Set(DATA.pages.map(p=>p.published.slice(0,7)))].sort().reverse();
+  const monthKeys = [...new Set(DATA.pages.filter(counts).map(p=>p.published.slice(0,7)))].sort().reverse();
   const curKey = AS_OF.slice(0,7);
   if(!monthKeys.includes(curKey)) monthKeys.unshift(curKey);
   const monthSel = document.getElementById("month");
@@ -615,7 +616,7 @@
   function renderHabits(){
     const n = +hPeriod.value, to = AS_OF, from = isoOf(new Date(toDate(to)-(n-1)*DAY));
     const pTo = isoOf(new Date(toDate(from)-DAY)), pFrom = isoOf(new Date(toDate(from)-n*DAY));
-    const earliest = DATA.pages.reduce((a,p)=>p.published<a?p.published:a, AS_OF);
+    const earliest = DATA.pages.filter(counts).reduce((a,p)=>p.published<a?p.published:a, AS_OF);
     const hasPrev = pFrom >= earliest;
     el("hRange").textContent = `${fmtDate(from)} – ${fmtDate(to)}`;
     el("hHelp").textContent = hasPrev
