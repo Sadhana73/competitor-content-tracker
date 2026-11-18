@@ -11,7 +11,7 @@ from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-import collect
+import collect, watch
 
 PORT = 8765
 IST = datetime.timezone(datetime.timedelta(hours=5, minutes=30))
@@ -35,14 +35,16 @@ class LogWriter(io.TextIOBase):
 def run_update():
     w = LogWriter()
     try:
-        importlib.reload(collect)          # always use the newest collector, even if it changed while the app was open
+        importlib.reload(collect); importlib.reload(watch)   # always use the newest program, even if it changed while the app was open
         with contextlib.redirect_stdout(w):
-            STATE["step"] = "Step 1 of 2: reading the feeds"
+            STATE["step"] = "Step 1 of 3: reading the feeds"
             print("Reading every company's feeds…")
             collect.step_feeds()
-            STATE["step"] = "Step 2 of 2: opening the new pages"
+            STATE["step"] = "Step 2 of 3: opening the new pages"
             print("Opening new pages to read dates, descriptions and calls to action…")
             collect.step_enrich(0)
+            STATE["step"] = "Step 3 of 3: checking watched pages"
+            watch.check_all()
         os.makedirs(os.path.dirname(LAST), exist_ok=True)
         open(LAST, "w").write(datetime.datetime.now(IST).strftime("%Y-%m-%d %H:%M"))
         STATE["step"] = "Done"
@@ -54,14 +56,29 @@ def run_update():
         STATE["finished"] = time.time()
 
 
+def run_watch_only():
+    w = LogWriter()
+    try:
+        importlib.reload(collect); importlib.reload(watch)
+        with contextlib.redirect_stdout(w):
+            STATE["step"] = "Checking watched pages"
+            watch.check_all()
+        STATE["step"] = "Done"
+    except Exception as e:
+        STATE["error"] = f"{type(e).__name__}: {e}"; STATE["step"] = "Stopped with a problem"
+    finally:
+        STATE["running"] = False; STATE["finished"] = time.time()
+
+
 def dashboard_html():
     """Same page the builder makes, assembled fresh on every visit."""
     src = open(os.path.join(HERE, "index.html"), encoding="utf-8").read()
     cfg = open(os.path.join(HERE, "config.js"), encoding="utf-8").read()
     store = os.path.join(HERE, "data", "pages.json")
     pages = json.load(open(store, encoding="utf-8")) if os.path.exists(store) else []
+    importlib.reload(watch)
     data = "window.TRACKER_DATA = " + json.dumps({"isSample": False, "live": True,
-            "asOf": datetime.datetime.now(IST).date().isoformat(), "pages": pages}, ensure_ascii=False) + ";"
+            "asOf": datetime.datetime.now(IST).date().isoformat(), "pages": pages, "watch": watch.for_dashboard()}, ensure_ascii=False) + ";"
     src = src.replace('<script src="config.js"></script>', "<script>\n" + cfg + "\n</script>")
     src = src.replace('<script src="data.js"></script>', "<script>\n" + data.replace("</", "<\\/") + "\n</script>")
     return src
@@ -96,17 +113,27 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         LAST_SEEN[0] = time.time()
-        if self.path != "/api/update":
-            return self.send(404, "{}")
         # only accept clicks from the dashboard itself
         origin = self.headers.get("Origin", "")
         if origin and origin not in (f"http://127.0.0.1:{PORT}", f"http://localhost:{PORT}"):
             return self.send(403, json.dumps({"error": "not allowed"}))
+        if self.path == "/api/watch":
+            try:
+                n = int(self.headers.get("Content-Length") or 0)
+                body = json.loads(self.rfile.read(n) or b"{}")
+                if body.get("action") == "remove":
+                    return self.send(200, json.dumps({"ok": watch.remove_page(body.get("url", ""))}))
+                url, added = watch.add_page(body.get("url", ""), body.get("name", ""))
+                return self.send(200, json.dumps({"ok": True, "url": url, "added": added}))
+            except Exception as e:
+                return self.send(400, json.dumps({"ok": False, "error": str(e)}))
+        if self.path not in ("/api/update", "/api/watch/check"):
+            return self.send(404, "{}")
         with LOCK:
             if STATE["running"]:
                 return self.send(200, json.dumps({"started": False, "reason": "already running"}))
             STATE.update(running=True, step="Starting…", log=[], started=time.time(), finished=None, error=None)
-        threading.Thread(target=run_update, daemon=True).start()
+        threading.Thread(target=run_watch_only if self.path == "/api/watch/check" else run_update, daemon=True).start()
         self.send(200, json.dumps({"started": True}))
 
 

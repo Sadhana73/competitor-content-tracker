@@ -8,8 +8,9 @@ src = open(os.path.join(HERE, "index.html"), encoding="utf-8").read()
 cfg = open(os.path.join(HERE, "config.js"), encoding="utf-8").read()
 store = os.path.join(HERE, "data", "pages.json")
 pages = json.load(open(store, encoding="utf-8")) if os.path.exists(store) else []
+import sys; sys.path.insert(0, HERE); import watch
 data = "window.TRACKER_DATA = " + json.dumps({"isSample": False,
-        "asOf": datetime.datetime.now(IST).date().isoformat(), "pages": pages}, ensure_ascii=False) + ";"
+        "asOf": datetime.datetime.now(IST).date().isoformat(), "pages": pages, "watch": watch.for_dashboard()}, ensure_ascii=False) + ";"
 data = data.replace("</", "<\\/")
 src = src.replace('<script src="config.js"></script>', "<script>\n" + cfg + "\n</script>")
 src = src.replace('<script src="data.js"></script>', "<script>\n" + data + "\n</script>")

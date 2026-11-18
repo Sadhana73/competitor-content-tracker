@@ -24,7 +24,7 @@
   header .sub{color:var(--muted);font-size:13px}
   .sample{background:#fff4cc;color:#7a5a00;border:1px solid #f5d77a;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600}
   nav{display:flex;gap:4px;margin-left:auto}
-  nav a{padding:8px 14px;border-radius:8px;color:var(--muted);font-weight:500}
+  nav a{padding:8px 11px;border-radius:8px;color:var(--muted);font-weight:500}
   nav a.on{background:var(--soft);color:var(--ink);font-weight:600}
   nav a:hover{text-decoration:none;background:var(--soft)}
   main{max-width:1480px;margin:0 auto;padding:20px 24px 60px}
@@ -195,6 +195,21 @@
   #habTable th,#habTable td{padding:10px 10px}
   @media (max-width:640px){.hcards{grid-template-columns:1fr}.hstats{grid-template-columns:repeat(2,1fr)}.hcols{grid-template-columns:1fr}}
   .daylist{margin-top:14px}
+  /* ---- page watch ---- */
+  .wadd{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .wadd input{flex:1;min-width:260px}
+  .wcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-bottom:12px}
+  .wcard h3{margin:0;font-size:16px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+  .wcard .u{font-size:12px;color:var(--muted);word-break:break-all}
+  .wchg{list-style:none;margin:10px 0 0;padding:0}
+  .wchg li{padding:6px 0;border-top:1px solid var(--line);font-size:14px;line-height:1.45}
+  .wchg li:first-child{border-top:none}
+  .wchg .tag{display:inline-block;font-size:11px;font-weight:700;border-radius:5px;padding:1px 7px;margin-right:6px}
+  .t-add{background:var(--comp-bg);color:var(--comp)} .t-rem{background:var(--missing-bg);color:var(--missing)} .t-chg{background:var(--behind-bg);color:var(--behind)}
+  .t-ai{background:#efe6ff;color:#5b21b6}
+  .wdet{margin-top:10px} .wdet summary{cursor:pointer;color:var(--link);font-size:13px}
+  .wdet table td{white-space:normal;vertical-align:top;font-size:12px;max-width:520px}
+  .wempty{color:var(--muted);font-size:14px;margin-top:8px}
   .daylist h3{font-size:15px;margin:0 0 8px}
   .daylist ul{list-style:none;margin:0;padding:0}
   .daylist li{padding:11px 16px;font-size:15px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
@@ -216,6 +231,7 @@
     <a href="#daily" id="nav-daily">Daily view</a>
     <a href="#habits" id="nav-habits">Competitor habits</a>
     <a href="#pages" id="nav-pages">Page list</a>
+    <a href="#watch" id="nav-watch">Page watch</a>
   </nav>
 </header>
 
@@ -288,6 +304,22 @@
     <div class="note" style="margin-bottom:12px">Checked by hand: pages under <b>No call to action</b> are regular blog posts. They inform the reader but don't ask them to start a trial, book a demo or download anything inside the article.</div>
     <div class="ctaNotes" id="ctaNotes"></div>
     <div class="panel"><div class="scroll"><table id="ctaTable"><thead></thead><tbody></tbody></table></div></div>
+  </section>
+
+  <!-- ============ PAGE WATCH ============ -->
+  <section id="view-watch" class="hidden">
+    <div class="bar">
+      <h2>Page watch</h2>
+      <select id="wCmp" aria-label="Compare with">
+        <option value="prev">Compare with: last check</option>
+        <option value="wb30">Compare with: ~30 days ago (Wayback Machine)</option>
+        <option value="wb90" selected>Compare with: ~90 days ago (Wayback Machine)</option>
+        <option value="wb365">Compare with: ~1 year ago (Wayback Machine)</option>
+      </select>
+    </div>
+    <div class="wadd" id="wAdd"></div>
+    <div class="help" style="margin:0 0 14px">Only the pages you add are watched. Each check saves the page's title, description, H1/H2 headings, menu, footer, buttons and AI-related links (such as llms.txt), and compares them with an earlier copy.</div>
+    <div id="wList"></div>
   </section>
 
   <!-- ============ SCREEN 5: PAGE LIST ============ -->
@@ -756,6 +788,75 @@ if(!window.TRACKER_DATA){
     if(selHab) el("hCards").scrollIntoView({behavior:"smooth", block:"start"});
   });
 
+
+  /* ---- page watch ---- */
+  const WF = [["title","Page title"],["description","Meta description"],["h1","H1"],["h2","H2 headings"],["menu","Top menu"],
+              ["footer","Footer"],["buttons","Buttons / calls to action"],["ai","AI-related links and files"],["schema","Structured data"],["words","Page length"]];
+  const q = t => `“${esc(String(t).slice(0,140))}”`;
+  function watchDiff(a, b){
+    const out = [];
+    for(const [k, label] of WF){
+      const x = a[k], y = b[k];
+      if(k === "words"){
+        if(x && y && Math.abs(y - x) / x > 0.15) out.push({t:"chg", txt:`<b>${label}</b>: about ${x.toLocaleString()} → ${y.toLocaleString()} words`});
+        continue;
+      }
+      if(Array.isArray(x) || Array.isArray(y)){
+        const A = new Set((x||[]).map(v=>v.toLowerCase())), B = new Set((y||[]).map(v=>v.toLowerCase()));
+        const added = (y||[]).filter(v=>!A.has(v.toLowerCase())), removed = (x||[]).filter(v=>!B.has(v.toLowerCase()));
+        const ai = k === "ai";
+        if((k === "h1") && added.length && removed.length){ out.push({t:"chg", txt:`<b>H1</b> changed from ${removed.map(q).join(", ")} to ${added.map(q).join(", ")}`}); continue; }
+        if(added.length) out.push({t: ai?"ai":"add", txt:`<b>${label}</b>: added ${added.slice(0,8).map(q).join(", ")}${added.length>8?` and ${added.length-8} more`:""}`});
+        if(removed.length) out.push({t: ai?"ai":"rem", txt:`<b>${label}</b>: removed ${removed.slice(0,8).map(q).join(", ")}${removed.length>8?` and ${removed.length-8} more`:""}`});
+      } else if((x||"") !== (y||"")){
+        out.push({t:"chg", txt:`<b>${label}</b> changed from ${x?q(x):"(none)"} to ${y?q(y):"(none)"}`});
+      }
+    }
+    return out.sort((m,n)=>(n.t==="ai")-(m.t==="ai"));
+  }
+  const fmtVal = v => Array.isArray(v) ? (v.length ? v.map(esc).join(" · ") : "—") : (v===undefined||v===""||v===null ? "—" : esc(String(v)));
+  function renderWatch(){
+    const live = DATA.live && /^https?:/.test(location.protocol);
+    const W = DATA.watch || [];
+    el("wAdd").innerHTML = live
+      ? `<input type="text" id="wUrl" placeholder="Paste a page address, e.g. https://www.hubspot.com/"><input type="text" id="wName" placeholder="Name (optional)" style="flex:0 1 220px">
+         <button id="wAddBtn">Add page</button><button id="wCheck" ${W.length?"":"disabled"}>Check now</button>`
+      : `<div class="gap" style="font-size:13px">${W.length ? "Snapshot view. Add pages and check them in the Competitor Tracker app." : "No pages watched yet. Add pages in the Competitor Tracker app (Page watch tab)."}</div>`;
+    if(live){
+      el("wAddBtn").onclick = async () => {
+        const url = el("wUrl").value.trim(); if(!url) return;
+        const r = await (await fetch("/api/watch", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({url, name: el("wName").value})})).json();
+        if(!r.ok){ el("wUrl").setCustomValidity(r.error); el("wUrl").reportValidity(); return; }
+        location.reload();
+      };
+      el("wCheck").onclick = () => window.__startJob && window.__startJob("/api/watch/check");
+    }
+    const k = el("wCmp").value;
+    el("wList").innerHTML = W.length ? W.map(w=>{
+      const now = w.now, then = k === "prev" ? w.prev : (w.wayback||{})[k];
+      let body;
+      if(!now) body = `<div class="wempty">Not checked yet. ${live?"Click <b>Check now</b>.":""}</div>`;
+      else if(!then) body = `<div class="wempty">${k==="prev" ? "Only one check so far. Changes appear after the next check." : "Not looked up yet."}</div>`;
+      else if(!then.fields) body = `<div class="wempty">No earlier copy: ${esc(then.note || "not available")}.</div>`;
+      else {
+        const ch = watchDiff(then.fields, now.fields);
+        body = (ch.length ? `<ul class="wchg">${ch.map(c=>`<li><span class="tag t-${c.t}">${{add:"Added",rem:"Removed",chg:"Changed",ai:"AI signal"}[c.t]}</span>${c.txt}</li>`).join("")}</ul>`
+                          : `<div class="wempty">No changes found.</div>`)
+          + `<details class="wdet"><summary>See everything side by side</summary><div class="scroll"><table><thead><tr><th>Part of the page</th><th>${fmtDate(then.date)}</th><th>${fmtDate(now.date)}</th></tr></thead><tbody>
+             ${WF.map(([f,l])=>`<tr><td><b>${l}</b></td><td>${fmtVal(then.fields[f])}</td><td>${fmtVal(now.fields[f])}</td></tr>`).join("")}</tbody></table></div></details>`;
+      }
+      if(w.lastError) body = `<div class="wempty" style="color:var(--missing)">Last check on ${fmtDate(w.lastError.date)}: ${esc(w.lastError.note)}. ${now?"Showing the last successful check.":""}</div>` + body;
+      const when = now ? `checked ${fmtDate(now.date)}` + (then && then.date ? ` · compared with ${fmtDate(then.date)}` : "") : "";
+      return `<div class="wcard"><h3>${esc(w.name)} <a class="u" href="${esc(w.url)}" target="_blank" rel="noopener">${esc(w.url)}</a>
+        <span class="gap" style="margin-left:auto;font-weight:500">${when}</span>
+        ${live?`<button class="wRem" data-url="${esc(w.url)}" style="font-size:12px;padding:4px 10px">Remove</button>`:""}</h3>${body}</div>`;
+    }).join("") : `<div class="wempty">No pages watched yet.${live?" Paste an address above, for example a competitor's home page, and click <b>Add page</b>.":""}</div>`;
+    document.querySelectorAll(".wRem").forEach(b=>b.onclick = async () => {
+      await fetch("/api/watch", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({action:"remove", url: b.dataset.url})}); location.reload();
+    });
+  }
+  el("wCmp").onchange = renderWatch;
+
   function openPages(f){
     el("q").value=""; el("fCo").value=f.co||""; el("fCat").value=f.cat||""; el("fCta").value=f.cta||""; el("fConf").value=f.conf||"";
     el("fFrom").value=f.from||""; el("fTo").value=f.to||""; pageNo=0;
@@ -775,7 +876,7 @@ if(!window.TRACKER_DATA){
     const show = st => {
       box.innerHTML = `<span>${st.lastUpdate ? "Last updated " + esc(st.lastUpdate) : "Not updated yet"}</span>
         <button id="updBtn" ${st.running?"disabled":""}>${st.running?"Updating…":"Update now"}</button>`;
-      el("updBtn").onclick = start;
+      el("updBtn").onclick = () => start("/api/update");
       if(st.running || wasRunning){
         panel.classList.remove("hidden");
         el("updStep").textContent = st.error ? "Stopped: " + st.error : st.step || "Updating…";
@@ -796,22 +897,23 @@ if(!window.TRACKER_DATA){
         clearTimeout(timer); timer = setTimeout(poll, st.running ? 1000 : 15000);
       } catch(e){ box.innerHTML = `<span>The Competitor Tracker app is closed. Double-click it again to update.</span>`; }
     };
-    async function start(){
-      el("updBtn").disabled = true;
-      await fetch("/api/update", {method:"POST"}); wasRunning = true; poll();
+    async function start(path){
+      const b = el("updBtn"); if(b) b.disabled = true;
+      await fetch(typeof path === "string" ? path : "/api/update", {method:"POST"}); wasRunning = true; poll();
     }
+    window.__startJob = start;
     el("updHide").onclick = () => panel.classList.add("hidden");
     poll();
   })();
 
   /* ---- simple two-screen routing ---- */
   function route(){
-    const v = ["#pages","#daily","#habits"].includes(location.hash) ? location.hash.slice(1) : "compare";
-    ["compare","daily","habits","pages"].forEach(n=>{
+    const v = ["#pages","#daily","#habits","#watch"].includes(location.hash) ? location.hash.slice(1) : "compare";
+    ["compare","daily","habits","pages","watch"].forEach(n=>{
       el("view-"+n).classList.toggle("hidden", v!==n);
       el("nav-"+n).classList.toggle("on", v===n);
     });
-    ({pages:renderPages, daily:renderDaily, habits:renderHabits, compare:renderCompare})[v]();
+    ({pages:renderPages, daily:renderDaily, habits:renderHabits, watch:renderWatch, compare:renderCompare})[v]();
     document.querySelector("main").classList.toggle("wide", v!=="compare");
     window.scrollTo(0,0);
   }
