@@ -94,6 +94,8 @@
   .upd button{background:var(--accent);color:#fff;border:none;font-weight:600;padding:8px 14px}
   .upd button:hover{background:#c41f21}
   .upd button:disabled{background:#f3b8b8;cursor:default}
+  .upd a.updlink{background:var(--accent);color:#fff;font-weight:600;padding:8px 14px;border-radius:8px}
+  .upd a.updlink:hover{text-decoration:none;background:#c41f21}
   .updPanel{background:#101828;color:#e4e7ec;padding:12px 24px 14px}
   .updHead{display:flex;align-items:center;gap:10px;max-width:1480px;margin:0 auto 8px;font-size:14px}
   .updHead .gap{color:#98a2b3}
@@ -816,8 +818,20 @@ if(!window.TRACKER_DATA){
   }
   const fmtVal = v => Array.isArray(v) ? (v.length ? v.map(esc).join(" · ") : "—") : (v===undefined||v===""||v===null ? "—" : esc(String(v)));
   function renderWatch(){
-    const live = DATA.live && /^https?:/.test(location.protocol);
+    const live = DATA.live && /^https?:/.test(location.protocol) && !DATA.hosted;
     const W = DATA.watch || [];
+    if(DATA.hosted){
+      el("wAdd").innerHTML = `<input type="text" id="wUrl" placeholder="Paste a page address, e.g. https://www.hubspot.com/"><input type="text" id="wName" placeholder="Name (optional)" style="flex:0 1 220px">
+        <button id="wGo">Watch this page ↗</button>`;
+      el("wGo").onclick = () => {
+        let url = el("wUrl").value.trim(); if(!url){ el("wUrl").focus(); return; }
+        if(!/^https?:\/\//i.test(url)) url = "https://" + url;
+        const name = el("wName").value.trim();
+        const link = `https://github.com/${CFG.githubRepo}/issues/new?title=` + encodeURIComponent("Watch: " + url) +
+          "&body=" + encodeURIComponent(url + (name ? "\nName: " + name : "") + "\n\n(Submit this to add the page. The site updates in a few minutes.)");
+        window.open(link, "_blank", "noopener");
+      };
+    } else
     el("wAdd").innerHTML = live
       ? `<input type="text" id="wUrl" placeholder="Paste a page address, e.g. https://www.hubspot.com/"><input type="text" id="wName" placeholder="Name (optional)" style="flex:0 1 220px">
          <button id="wAddBtn">Add page</button><button id="wCheck" ${W.length?"":"disabled"}>Check now</button>`
@@ -851,6 +865,7 @@ if(!window.TRACKER_DATA){
         <span class="gap" style="margin-left:auto;font-weight:500">${when}</span>
         ${live?`<button class="wRem" data-url="${esc(w.url)}" style="font-size:12px;padding:4px 10px">Remove</button>`:""}</h3>${body}</div>`;
     }).join("") : (live ? `<div class="wempty">No pages watched yet. Paste an address above, for example a competitor's home page, and click <b>Add page</b>.</div>` : "");
+    if(DATA.hosted && W.length) el("wList").insertAdjacentHTML("afterbegin", `<div class="help" style="margin:-4px 0 12px">To stop watching a page, remove it from <a href="https://github.com/${esc(CFG.githubRepo)}/blob/main/data/watch.json" target="_blank" rel="noopener">data/watch.json</a> on GitHub.</div>`);
     document.querySelectorAll(".wRem").forEach(b=>b.onclick = async () => {
       await fetch("/api/watch", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({action:"remove", url: b.dataset.url})}); location.reload();
     });
@@ -867,6 +882,12 @@ if(!window.TRACKER_DATA){
   /* ---- Update now (works when opened through the Competitor Tracker app) ---- */
   (function(){
     const box = el("upd"), panel = el("updPanel");
+    if(DATA.hosted){
+      const repo = CFG.githubRepo;
+      box.innerHTML = `<span>Updated daily${DATA.lastUpdate ? " · last update " + esc(DATA.lastUpdate) + " IST" : ""}</span>
+        <a class="updlink" href="https://github.com/${esc(repo)}/actions/workflows/update.yml" target="_blank" rel="noopener">Update now ↗</a>`;
+      return;
+    }
     if(!DATA.live || !/^https?:/.test(location.protocol)){
       if(DATA.snapshot) box.innerHTML = `Snapshot · data as of ${fmtDate(AS_OF)}`;
       else if(!DATA.isSample) box.innerHTML = `Data as of ${fmtDate(AS_OF)} · open the <b>Competitor Tracker</b> app to update`;

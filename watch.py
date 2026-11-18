@@ -170,5 +170,11 @@ def for_dashboard():
 if __name__ == "__main__":
     import sys
     if len(sys.argv) > 2 and sys.argv[1] == "add": print(add_page(sys.argv[2], " ".join(sys.argv[3:])))
+    elif len(sys.argv) > 2 and sys.argv[1] == "add-from-text":          # used by GitHub Actions (issue title + body)
+        text = " ".join(sys.argv[2:])
+        m = re.search(r"https?://[^\s<>\"')]+", text)
+        if not m: print("No web address found in the request."); sys.exit(1)
+        name = re.search(r"Name:\s*(.+)", text)
+        print(add_page(m.group(0), name.group(1).strip() if name else ""))
     elif len(sys.argv) > 2 and sys.argv[1] == "remove": print(remove_page(sys.argv[2]))
     else: check_all()

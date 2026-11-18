@@ -90,6 +90,10 @@ window.TRACKER_CONFIG = {
     { name: "Talk to sales",         words: ["contact sales", "talk to sales", "see pricing", "get a quote"] }
   ],
 
+  // Public site (GitHub Pages). The "Watch this page" field opens a pre-filled issue in this repo;
+  // GitHub Actions then adds and checks the page (only issues opened by the repo owner are accepted).
+  githubRepo: "Sadhana73/competitor-content-tracker",
+
   // Status rules for the home screen.
   thresholds: {
     bigGapMultiple: 3   // "Big gap" when the top competitor published this many times Zoho CRM or more

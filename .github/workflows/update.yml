@@ -1,0 +1,77 @@
+# Runs the tracker on GitHub every morning and publishes the dashboard to GitHub Pages.
+# Also runs when the repo owner opens an issue titled "Watch: <address>" (from the site's Page watch field).
+name: Update tracker
+
+on:
+  schedule:
+    - cron: "30 0 * * *"        # every day at 06:00 IST
+  workflow_dispatch:            # "Run workflow" button
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+  issues: write
+
+concurrency:
+  group: tracker
+  cancel-in-progress: false
+
+jobs:
+  update:
+    # issues: only "Watch:" requests opened by the repo owner
+    if: github.event_name != 'issues' || (startsWith(github.event.issue.title, 'Watch:') && github.event.issue.user.login == github.repository_owner)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Add the page from the request
+        if: github.event_name == 'issues'
+        env:
+          REQUEST: ${{ github.event.issue.title }} ${{ github.event.issue.body }}
+        run: python3 watch.py add-from-text "$REQUEST"
+
+      - name: Collect new competitor pages
+        if: github.event_name != 'issues'
+        run: |
+          python3 collect.py feeds
+          python3 collect.py enrich all
+
+      - name: Check watched pages
+        run: python3 watch.py
+
+      - name: Build the site
+        run: |
+          TZ=Asia/Kolkata date "+%Y-%m-%d %H:%M" > data/last-update.txt
+          python3 build_dashboard.py --site
+
+      - name: Save the new data to the repo
+        run: |
+          git config user.name "tracker-bot"
+          git config user.email "tracker-bot@users.noreply.github.com"
+          git add data
+          git commit -m "Daily update $(TZ=Asia/Kolkata date '+%Y-%m-%d %H:%M') IST" || echo "Nothing new"
+          git push
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deploy
+        uses: actions/deploy-pages@v4
+
+      - name: Close the request
+        if: github.event_name == 'issues'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh issue close ${{ github.event.issue.number }} --repo ${{ github.repository }} --comment "Added and checked. It's on the site now (Page watch tab)."
