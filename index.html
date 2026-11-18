@@ -282,7 +282,7 @@
     <div class="hcards hidden" id="hCards"></div>
 
     <h3 style="margin:28px 0 4px;font-size:17px">What their pages ask readers to do</h3>
-    <div class="help" style="margin:0 0 12px">Share of each company's pages (same period) that include each call to action. A page can have more than one. "Pages" counts only pages the collector has opened and checked.</div>
+    <div class="help" style="margin:0 0 12px">Share of each company's pages (same period) that include each call to action. A page can have more than one. "Pages" counts only pages the collector has opened and checked. Notes appear only with 5+ checked pages. Detection is still being improved: many sites add their buttons after the page loads, so some calls to action are missed.</div>
     <div class="ctaNotes" id="ctaNotes"></div>
     <div class="panel"><div class="scroll"><table id="ctaTable"><thead></thead><tbody></tbody></table></div></div>
   </section>
@@ -356,6 +356,11 @@ if(!window.TRACKER_DATA){
   const counts = p => !p.exclude && !p.needsDate;   // old pages that were only updated, or not yet checked, never count
   const pages = () => DATA.pages.filter(counts).map(p => overrides[p.url] ? {...p, category: overrides[p.url], setBy:"Manual"} : p);
 
+  // when each company's history starts; comparisons with earlier periods are hidden until we have data for them
+  const historyStart = {};
+  DATA.pages.filter(counts).forEach(p=>{ if(!historyStart[p.company] || p.published < historyStart[p.company]) historyStart[p.company] = p.published; });
+  const hasHistory = (co, fromIso) => historyStart[co] && historyStart[co] <= fromIso;
+
   /* ---- status rules (from the spec) ---- */
   const STATUS = {
     missing:{label:"Missing",cls:"s-missing",order:0,desc:"At least one competitor published, Zoho CRM published 0"},
@@ -399,7 +404,8 @@ if(!window.TRACKER_DATA){
       const n = inMonth.filter(p=>p.company===c.name).length;
       const before = inPrev.filter(p=>p.company===c.name).length;
       let chg = "";
-      if(monthKeys.includes(pk) || before){
+      if(!hasHistory(c.name, `${pk}-01`)) chg = `<span title="Tracking for this company started ${historyStart[c.name]?fmtDate(historyStart[c.name]):"recently"}">Not enough history yet to compare</span>`;
+      else if(monthKeys.includes(pk) || before){
         const diff = n - before;
         const pct = before ? Math.round(diff/before*100) : null;
         const cls = diff>0?"up":diff<0?"down":"";
@@ -628,7 +634,7 @@ if(!window.TRACKER_DATA){
     const hasPrev = pFrom >= earliest;
     el("hRange").textContent = `${fmtDate(from)} – ${fmtDate(to)}`;
     el("hHelp").textContent = hasPrev
-      ? `"Rising topic" compares with the ${n} days before (${fmtDate(pFrom)} – ${fmtDate(pTo)}). Counts show focus, not quality.`
+      ? `"Rising topic" and "Change" compare with the ${n} days before (${fmtDate(pFrom)} – ${fmtDate(pTo)}). Counts show focus, not quality.`
       : `Not enough earlier data to compare with the previous ${n} days, so rising topics are hidden. Pick a shorter period.`;
     const all = pages();
     const inWin = all.filter(p=>p.published>=from && p.published<=to);
@@ -642,7 +648,7 @@ if(!window.TRACKER_DATA){
       const prevTotal = inPrev.filter(p=>p.company===c.name).length;
       const focus = real.map(k=>[k,now[k]]).sort((a,b)=>b[1]-a[1])[0];
       const shifts = real.map(k=>({k, now:now[k], prev:prev[k], d:now[k]-prev[k]}));
-      const rising = hasPrev ? shifts.filter(x=>x.d>=2).sort((a,b)=>b.d-a.d)[0] : null;
+      const rising = hasPrev && hasHistory(c.name, pFrom) ? shifts.filter(x=>x.d>=2).sort((a,b)=>b.d-a.d)[0] : null;
       let gap = null, lead = [], behind = null;
       if(c.role!=="baseline"){
         gap = real.map(k=>({k, them:now[k], z:zNow[k], d:now[k]-zNow[k]})).filter(x=>x.d>0).sort((a,b)=>b.d-a.d)[0] || null;
@@ -669,7 +675,7 @@ if(!window.TRACKER_DATA){
     });
 
     const f1 = x => x>=10 ? Math.round(x) : x.toFixed(1);
-    const chgCell = x => { if(!hasPrev) return "—"; const d = x.total - x.prevTotal; const pct = x.prevTotal ? Math.round(d/x.prevTotal*100) : null;
+    const chgCell = x => { if(!hasPrev || !hasHistory(x.c.name, pFrom)) return `<span class="gap" title="Not enough history yet">—</span>`; const d = x.total - x.prevTotal; const pct = x.prevTotal ? Math.round(d/x.prevTotal*100) : null;
       return `<span class="${d>0?"up":d<0?"down":""}">${d>0?"▲":d<0?"▼":"■"} ${pct===null?(d>0?"+"+d:d):Math.abs(pct)+"%"}</span>`; };
 
     el("habTable").querySelector("thead").innerHTML = `<tr><th>Company</th><th class="n">Pages / week</th><th class="n" title="Compared with the previous period of the same length">Change</th><th>Main focus</th><th>Rising topic</th><th>Biggest gap vs Zoho CRM</th></tr>`;
@@ -724,8 +730,8 @@ if(!window.TRACKER_DATA){
     const z = ctaRows.find(r=>r.c.role==="baseline");
     const notes = [];
     ctaTypes.forEach(t=>{
-      const best = ctaRows.filter(r=>r.c.role!=="baseline").sort((a,b)=>b.pct[t]-a.pct[t])[0];
-      if(best && z && best.pct[t] - z.pct[t] >= 15) notes.push({d: best.pct[t]-z.pct[t], txt:
+      const best = ctaRows.filter(r=>r.c.role!=="baseline" && r.n>=5).sort((a,b)=>b.pct[t]-a.pct[t])[0];
+      if(best && z && z.n>=5 && best.pct[t] - z.pct[t] >= 15) notes.push({d: best.pct[t]-z.pct[t], txt:
         `<b>${esc(best.c.name)}</b> puts a <b>${esc(t.toLowerCase())}</b> on ${best.pct[t]}% of its pages. Zoho CRM: ${z.pct[t]}%.`});
       if(best && z && z.pct[t] - best.pct[t] >= 10) notes.push({d: z.pct[t]-best.pct[t]-100, txt:
         `Zoho CRM uses <b>${esc(t.toLowerCase())}</b> more than any competitor (${z.pct[t]}% vs ${best.pct[t]}%).`});
@@ -754,7 +760,8 @@ if(!window.TRACKER_DATA){
   (function(){
     const box = el("upd"), panel = el("updPanel");
     if(!DATA.live || !/^https?:/.test(location.protocol)){
-      if(!DATA.isSample) box.innerHTML = `Data as of ${fmtDate(AS_OF)} · open the <b>Competitor Tracker</b> app to update`;
+      if(DATA.snapshot) box.innerHTML = `Snapshot · data as of ${fmtDate(AS_OF)}`;
+      else if(!DATA.isSample) box.innerHTML = `Data as of ${fmtDate(AS_OF)} · open the <b>Competitor Tracker</b> app to update`;
       return;
     }
     let timer = null, wasRunning = false;
