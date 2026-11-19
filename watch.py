@@ -216,11 +216,15 @@ def check_all():
             old = s["wayback"].get(k)
             if old and old.get("checked") == today and old.get("version") == 2: continue   # at most once a day
             d, got = wayback_copy(w["url"], days)
+            if not d:                                   # the Wayback Machine is often slow: wait and try once more
+                time.sleep(8); d, got = wayback_copy(w["url"], days)
             if d:
                 ts = d.replace("-", "")
                 view = f"https://web.archive.org/web/{ts}/{w['url']}"
                 shot = f"{key}-{k}.jpg" if screenshot(f"https://web.archive.org/web/{ts}if_/{w['url']}", os.path.join(SHOTS, f"{key}-{k}.jpg")) else None
                 s["wayback"][k] = {"date": d, "checked": today, "fields": extract(got, cfg), "view": view, "shot": shot, "version": 2}
+            elif old and old.get("fields"):            # keep the last good copy rather than losing it
+                old["lastTry"] = {"date": today, "note": got}
             else: s["wayback"][k] = {"date": None, "checked": today, "note": got, "version": 2}
             time.sleep(1)
         _save_snaps(w["url"], s)
