@@ -212,6 +212,22 @@
   .wdet{margin-top:10px} .wdet summary{cursor:pointer;color:var(--link);font-size:13px}
   .wdet table td{white-space:normal;vertical-align:top;font-size:12px;max-width:520px}
   .wempty{color:var(--muted);font-size:14px;margin-top:8px}
+  table.wtab{margin-top:10px;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  table.wtab th{font-size:11px}
+  table.wtab td{white-space:normal;vertical-align:top;font-size:13px;line-height:1.45;padding:9px 12px}
+  table.wtab td.part{width:190px;font-weight:600}
+  table.wtab td.was,table.wtab td.now{width:41%}
+  .chip{display:inline-block;border-radius:5px;padding:1px 7px;margin:2px 4px 2px 0;font-size:12px}
+  .c-rem{background:var(--missing-bg);color:var(--missing);text-decoration:line-through}
+  .c-add{background:var(--comp-bg);color:var(--comp)}
+  .c-old{color:#667085} .c-new{color:var(--ink);font-weight:600}
+  .wlinks{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .wlinks button,.wlinks a{font-size:12px;padding:5px 10px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink)}
+  .shots{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+  .shots figure{margin:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}
+  .shots figcaption{font-size:12px;font-weight:600;padding:6px 10px;background:var(--soft)}
+  .shots img{display:block;width:100%;height:auto}
+  .shots .noshot{padding:30px 12px;color:var(--muted);font-size:13px;text-align:center}
   .daylist h3{font-size:15px;margin:0 0 8px}
   .daylist ul{list-style:none;margin:0;padding:0}
   .daylist li{padding:11px 16px;font-size:15px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
@@ -320,7 +336,7 @@
       </select>
     </div>
     <div class="wadd" id="wAdd"></div>
-    <div class="help" style="margin:0 0 14px">Only the pages you add are watched. Each check saves the page's title, description, H1/H2 headings, menu, footer, buttons and AI-related links (such as llms.txt), and compares them with an earlier copy.</div>
+    <div class="help" style="margin:0 0 14px">Only the pages you add are watched. Each check saves the page's title, description, H1/H2 headings, menu, footer, buttons and AI-related links (such as llms.txt), takes a screenshot, and compares them with an earlier copy. In the table, red = taken away, green = added.</div>
     <div id="wList"></div>
   </section>
 
@@ -816,6 +832,33 @@ if(!window.TRACKER_DATA){
     }
     return out.sort((m,n)=>(n.t==="ai")-(m.t==="ai"));
   }
+  function watchRows(a, b){
+    const rows = [];
+    for(const [k, label] of WF){
+      const x = a[k], y = b[k];
+      const isAI = k === "ai";
+      const tag = isAI ? ` <span class="tag t-ai">AI signal</span>` : "";
+      if(k === "words"){
+        if(x && y && Math.abs(y - x) / x > 0.15) rows.push(`<tr><td class="part">${label}</td><td class="was c-old">about ${x.toLocaleString()} words</td><td class="now c-new">about ${y.toLocaleString()} words</td></tr>`);
+        continue;
+      }
+      if(Array.isArray(x) || Array.isArray(y)){
+        const A = new Set((x||[]).map(v=>v.toLowerCase())), B = new Set((y||[]).map(v=>v.toLowerCase()));
+        const removed = (x||[]).filter(v=>!B.has(v.toLowerCase())), added = (y||[]).filter(v=>!A.has(v.toLowerCase()));
+        if(!removed.length && !added.length) continue;
+        if(k === "h1" || k === "h2"){
+          rows.push(`<tr><td class="part">${label}${tag}</td><td class="was">${(x||[]).length ? x.map(v=>`<div class="${removed.includes(v)?"c-old":""}">${esc(v)}</div>`).join("") : "—"}</td>
+            <td class="now">${(y||[]).length ? y.map(v=>`<div class="${added.includes(v)?"c-new":""}">${esc(v)}</div>`).join("") : "—"}</td></tr>`);
+        } else {
+          const chips = (vs, c) => vs.length ? vs.slice(0,20).map(v=>`<span class="chip ${c}">${esc(v)}</span>`).join("") + (vs.length>20?` <span class="gap">+${vs.length-20} more</span>`:"") : `<span class="gap">nothing removed</span>`;
+          rows.push(`<tr><td class="part">${label}${tag}</td><td class="was">${removed.length ? chips(removed,"c-rem") : '<span class="gap">—</span>'}</td><td class="now">${added.length ? chips(added,"c-add") : '<span class="gap">—</span>'}</td></tr>`);
+        }
+      } else if((x||"") !== (y||"")){
+        rows.push(`<tr><td class="part">${label}</td><td class="was c-old">${x?esc(x):"(none)"}</td><td class="now c-new">${y?esc(y):"(none)"}</td></tr>`);
+      }
+    }
+    return rows;
+  }
   const fmtVal = v => Array.isArray(v) ? (v.length ? v.map(esc).join(" · ") : "—") : (v===undefined||v===""||v===null ? "—" : esc(String(v)));
   function renderWatch(){
     const live = DATA.live && /^https?:/.test(location.protocol) && !DATA.hosted;
@@ -853,12 +896,24 @@ if(!window.TRACKER_DATA){
       else if(!then) body = `<div class="wempty">${k==="prev" ? "Only one check so far. Changes appear after the next check." : "Not looked up yet."}</div>`;
       else if(!then.fields) body = `<div class="wempty">No earlier copy: ${esc(then.note || "not available")}.</div>`;
       else {
-        const ch = watchDiff(then.fields, now.fields);
-        body = (ch.length ? `<ul class="wchg">${ch.map(c=>`<li><span class="tag t-${c.t}">${{add:"Added",rem:"Removed",chg:"Changed",ai:"AI signal"}[c.t]}</span>${c.txt}</li>`).join("")}</ul>`
-                          : `<div class="wempty">No changes found.</div>`)
-          + `<details class="wdet"><summary>See everything side by side</summary><div class="scroll"><table><thead><tr><th>Part of the page</th><th>${fmtDate(then.date)}</th><th>${fmtDate(now.date)}</th></tr></thead><tbody>
+        const rows = watchRows(then.fields, now.fields);
+        body = (rows.length
+          ? `<table class="wtab"><thead><tr><th>Part of the page</th><th>Earlier · ${fmtDate(then.date)}</th><th>Now · ${fmtDate(now.date)}</th></tr></thead><tbody>${rows.join("")}</tbody></table>`
+          : `<div class="wempty">No changes found.</div>`)
+          + `<details class="wdet"><summary>See everything side by side (unchanged parts too)</summary><div class="scroll"><table><thead><tr><th>Part of the page</th><th>${fmtDate(then.date)}</th><th>${fmtDate(now.date)}</th></tr></thead><tbody>
              ${WF.map(([f,l])=>`<tr><td><b>${l}</b></td><td>${fmtVal(then.fields[f])}</td><td>${fmtVal(now.fields[f])}</td></tr>`).join("")}</tbody></table></div></details>`;
       }
+      const shotSrc = f => f ? (DATA.hosted ? "shots/" : "data/watch-shots/") + f : null;
+      const hasShots = now && (now.shot || (then && then.shot));
+      body += `<div class="wlinks">
+        ${hasShots ? `<button class="wShots" data-i="${W.indexOf(w)}">View screenshots: earlier | now</button>` : ""}
+        <a href="${esc(w.url)}" target="_blank" rel="noopener">Open live page ↗</a>
+        ${then && then.view ? `<a href="${esc(then.view)}" target="_blank" rel="noopener">Open Wayback copy (${fmtDate(then.date)}) ↗</a>` : ""}
+      </div>
+      <div class="shots hidden" id="shots-${W.indexOf(w)}">
+        <figure><figcaption>Earlier · ${then && then.date ? fmtDate(then.date) : "—"}</figcaption>${then && then.shot ? `<img loading="lazy" src="${shotSrc(then.shot)}" alt="Earlier screenshot">` : `<div class="noshot">No screenshot for this copy yet.</div>`}</figure>
+        <figure><figcaption>Now · ${now ? fmtDate(now.date) : "—"}</figcaption>${now && now.shot ? `<img loading="lazy" src="${shotSrc(now.shot)}" alt="Current screenshot">` : `<div class="noshot">No screenshot yet.</div>`}</figure>
+      </div>`;
       if(w.lastError) body = `<div class="wempty" style="color:var(--missing)">Last check on ${fmtDate(w.lastError.date)}: ${esc(w.lastError.note)}. ${now?"Showing the last successful check.":""}</div>` + body;
       const when = now ? `checked ${fmtDate(now.date)}` + (then && then.date ? ` · compared with ${fmtDate(then.date)}` : "") : "";
       return `<div class="wcard"><h3>${esc(w.name)} <a class="u" href="${esc(w.url)}" target="_blank" rel="noopener">${esc(w.url)}</a>
@@ -866,6 +921,10 @@ if(!window.TRACKER_DATA){
         ${live?`<button class="wRem" data-url="${esc(w.url)}" style="font-size:12px;padding:4px 10px">Remove</button>`:""}</h3>${body}</div>`;
     }).join("") : (live ? `<div class="wempty">No pages watched yet. Paste an address above, for example a competitor's home page, and click <b>Add page</b>.</div>` : "");
     if(DATA.hosted && W.length) el("wList").insertAdjacentHTML("afterbegin", `<div class="help" style="margin:-4px 0 12px">To stop watching a page, remove it from <a href="https://github.com/${esc(CFG.githubRepo)}/blob/main/data/watch.json" target="_blank" rel="noopener">data/watch.json</a> on GitHub.</div>`);
+    document.querySelectorAll(".wShots").forEach(b=>b.onclick=()=>{
+      const box = el("shots-"+b.dataset.i); const open = box.classList.toggle("hidden") === false;
+      b.textContent = open ? "Hide screenshots" : "View screenshots: earlier | now";
+    });
     document.querySelectorAll(".wRem").forEach(b=>b.onclick = async () => {
       await fetch("/api/watch", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({action:"remove", url: b.dataset.url})}); location.reload();
     });

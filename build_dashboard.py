@@ -22,4 +22,8 @@ src = src.replace('<script src="data.js"></script>', "<script>\n" + data + "\n</
 out = os.path.join(HERE, "site", "index.html") if SITE else os.path.join(HERE, "Competitor Content Tracker.html")
 os.makedirs(os.path.dirname(out), exist_ok=True)
 open(out, "w", encoding="utf-8").write(src)
+if SITE:   # screenshots for Page watch
+    import shutil
+    shots = os.path.join(HERE, "data", "watch-shots")
+    if os.path.isdir(shots): shutil.copytree(shots, os.path.join(HERE, "site", "shots"), dirs_exist_ok=True)
 print(f"Dashboard updated: {out} ({len(pages)} pages)")

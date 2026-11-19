@@ -55,18 +55,72 @@ def remove_page(url):
 
 
 # ---------------------------------------------------------------- reading a page
-def _strip(doc):
-    return re.sub(r"<(script|style|noscript|svg|template)[\s>].*?</\1>", " ", doc, flags=re.S | re.I)
+from html.parser import HTMLParser
 
-def _texts(part, tag):
-    return [t for t in (collect.clean(m) for m in re.findall(rf"<{tag}[^>]*>(.*?)</{tag}>", part, flags=re.S | re.I)) if t]
+CTA_VERBS = re.compile(r"\b(get|start|try|book|request|schedule|sign ?up|join|download|contact|talk|buy|subscribe|register|demo|free|trial|see pricing|watch)\b", re.I)
 
-def _links(part):
-    out = []
-    for href, inner in re.findall(r'<a\b[^>]*href="([^"]*)"[^>]*>(.*?)</a>', part, flags=re.S | re.I):
-        t = collect.clean(inner) or collect.clean(" ".join(re.findall(r'(?:alt|aria-label|title)="([^"]*)"', inner + href, flags=re.I)))
-        if t: out.append((t[:80], href))
-    return out
+def _tidy(t):
+    t = re.sub(r"\s+", " ", html.unescape(t or "")).strip()
+    m = re.fullmatch(r"(.+?)(?: \1)+", t)           # "Email Tracking Email Tracking" -> "Email Tracking"
+    return (m.group(1) if m else t)[:90]
+
+class _Page(HTMLParser):
+    """Reads a page the way a browser would: headings, links, buttons, and which part (menu/footer) they are in."""
+    SKIP = {"script", "style", "noscript", "svg", "template"}
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.stack, self.skip = [], 0
+        self.title = ""; self.meta = {}; self.jsonld_types = set(); self.ai_links = []
+        self.h1, self.h2, self.menu, self.footer, self.buttons, self.links = [], [], [], [], [], []
+        self.words = 0; self._cap = None; self._in_ld = False
+    def _zone(self):
+        tags = [t for t, _ in self.stack]
+        if "footer" in tags: return "footer"
+        if "nav" in tags or "header" in tags: return "menu"
+        return "body"
+    def handle_starttag(self, tag, attrs):
+        a = dict(attrs)
+        if tag in ("meta",):
+            k = (a.get("name") or a.get("property") or "").lower()
+            if k: self.meta[k] = a.get("content") or ""
+            return
+        if tag == "link":
+            h = a.get("href") or ""
+            if re.search(r"llms?(-full)?\.txt", h, re.I): self.ai_links.append(f"<link> {h}")
+            return
+        if tag in ("br", "img", "input", "hr", "source", "wbr"):
+            if tag == "img" and self._cap is not None: self._cap["text"] += " " + (a.get("alt") or "")
+            return
+        if tag == "script" and "ld+json" in (a.get("type") or ""): self._in_ld = True
+        if tag in self.SKIP: self.skip += 1
+        self.stack.append((tag, a))
+        if tag in ("title", "h1", "h2", "a", "button") and self._cap is None:
+            self._cap = {"tag": tag, "text": "", "href": a.get("href") or "", "label": a.get("aria-label") or a.get("title") or "", "zone": self._zone()}
+    def handle_endtag(self, tag):
+        if self._cap is not None and self._cap["tag"] == tag:
+            c, self._cap = self._cap, None
+            t = _tidy(c["text"]) or _tidy(c["label"])
+            if t:
+                if tag == "title": self.title = t
+                elif tag == "h1": self.h1.append(t)
+                elif tag == "h2": self.h2.append(t)
+                else:
+                    if tag == "a":
+                        self.links.append((t, c["href"]))
+                        if c["zone"] == "menu": self.menu.append(t)
+                        elif c["zone"] == "footer": self.footer.append(t)
+                    self.buttons.append(t)
+                    if AI_HINTS.search(t + " " + c["href"]): self.ai_links.append(f"{t} ({c['href']})")
+        if tag == "script": self._in_ld = False
+        for i in range(len(self.stack) - 1, -1, -1):
+            if self.stack[i][0] == tag:
+                if tag in self.SKIP: self.skip = max(0, self.skip - 1)
+                del self.stack[i:]; break
+    def handle_data(self, d):
+        if self._in_ld: self.jsonld_types.update(re.findall(r'"@type"\s*:\s*"([^"]+)"', d)); return
+        if self.skip: return
+        if self._cap is not None: self._cap["text"] += d
+        if self.stack and self.stack[-1][0] != "title": self.words += len(d.split())
 
 def _uniq(xs, n):
     seen, out = set(), []
@@ -78,34 +132,41 @@ def _uniq(xs, n):
 
 def extract(doc, cfg):
     """Pull out the parts of a page worth comparing."""
-    raw = doc
-    doc = _strip(doc)
-    region = lambda tag: " ".join(re.findall(rf"<{tag}[\s>].*?</{tag}>", doc, flags=re.S | re.I))
-    nav = region("nav") or region("header")
-    foot = region("footer")
-    body = re.search(r"<body[\s>].*?</body>", doc, flags=re.S | re.I)
-    text = collect.clean(body.group(0) if body else doc)
+    p = _Page()
+    try: p.feed(doc); p.close()
+    except Exception: pass
     words = {w for c in cfg.get("ctaTypes", []) for w in c["words"]}
-    all_links = _links(doc)
-    # real calls to action only (not menu controls like "Menu", "Close Search" or "Select a language")
-    cta_verbs = re.compile(r"\b(get|start|try|book|request|schedule|sign ?up|join|download|contact|talk|buy|subscribe|register|demo|free|trial|see pricing|watch)\b", re.I)
-    candidates = [t for t in _texts(doc, "button")] + [t for t, h in all_links]
-    buttons = [t for t in candidates if (any(w in t.lower() for w in words) or cta_verbs.search(t)) and len(t.split()) <= 8]
-    ai = [f"{t} ({h})" for t, h in all_links if AI_HINTS.search(t + " " + h)]
-    ai += [f'<link> {h}' for h in re.findall(r'<link[^>]+href="([^"]*llms?[^"]*\.txt)"', raw, flags=re.I)]
-    jsonld = re.findall(r'"@type"\s*:\s*"([^"]+)"', raw)
+    ctas = [t for t in p.buttons if (any(w in t.lower() for w in words) or CTA_VERBS.search(t)) and len(t.split()) <= 8]
     return {
-        "title": collect.clean((re.search(r"<title[^>]*>(.*?)</title>", raw, flags=re.S | re.I) or [None, ""])[1])[:200],
-        "description": collect.meta(raw, "description", "og:description")[:300],
-        "h1": _uniq(_texts(doc, "h1"), 5),
-        "h2": _uniq(_texts(doc, "h2"), 15),
-        "menu": _uniq([t for t, _ in _links(nav)], 40),
-        "footer": _uniq([t for t, _ in _links(foot)], 80),
-        "buttons": _uniq(buttons, 25),
-        "ai": _uniq(ai, 15),
-        "schema": sorted(set(jsonld))[:20],
-        "words": len(text.split()),
+        "title": p.title[:200],
+        "description": (p.meta.get("description") or p.meta.get("og:description") or "")[:300],
+        "h1": _uniq(p.h1, 5), "h2": _uniq(p.h2, 15),
+        "menu": _uniq(p.menu, 40), "footer": _uniq(p.footer, 80),
+        "buttons": _uniq(ctas, 25), "ai": _uniq(p.ai_links, 15),
+        "schema": sorted(p.jsonld_types)[:20], "words": p.words,
     }
+
+
+# ---------------------------------------------------------------- screenshots (on GitHub; skipped if the browser isn't installed)
+SHOTS = os.path.join(HERE, "data", "watch-shots")
+
+def screenshot(url, out):
+    try:
+        from playwright.sync_api import sync_playwright
+    except Exception:
+        return False
+    try:
+        with sync_playwright() as pw:
+            b = pw.chromium.launch()
+            pg = b.new_page(viewport={"width": 1280, "height": 900}, user_agent=collect.UA)
+            pg.goto(url, wait_until="domcontentloaded", timeout=45000)
+            pg.wait_for_timeout(3500)
+            os.makedirs(os.path.dirname(out), exist_ok=True)
+            pg.screenshot(path=out, type="jpeg", quality=65, full_page=False)
+            b.close()
+        return True
+    except Exception as e:
+        print(f"    screenshot skipped ({type(e).__name__})", flush=True); return False
 
 
 # ---------------------------------------------------------------- checking
@@ -147,14 +208,20 @@ def check_all():
             print(f"  {w['name']}: couldn't open the page ({info[:60]})", flush=True); continue
         s.pop("lastError", None)
         fields = extract(doc, cfg)
-        s["live"] = [x for x in s["live"] if x["date"] != today] + [{"date": today, "fields": fields}]
+        key = _key(w["url"])
+        shot_now = f"{key}-now.jpg" if screenshot(w["url"], os.path.join(SHOTS, f"{key}-now.jpg")) else None
+        s["live"] = [x for x in s["live"] if x["date"] != today] + [{"date": today, "fields": fields, "shot": shot_now}]
         s["live"] = s["live"][-30:]
         for k, days in WAYBACK_AGES.items():
             old = s["wayback"].get(k)
-            if old and old.get("checked") == today: continue         # at most once a day
+            if old and old.get("checked") == today and old.get("version") == 2: continue   # at most once a day
             d, got = wayback_copy(w["url"], days)
-            if d: s["wayback"][k] = {"date": d, "checked": today, "fields": extract(got, cfg)}
-            else: s["wayback"][k] = {"date": None, "checked": today, "note": got}
+            if d:
+                ts = d.replace("-", "")
+                view = f"https://web.archive.org/web/{ts}/{w['url']}"
+                shot = f"{key}-{k}.jpg" if screenshot(f"https://web.archive.org/web/{ts}if_/{w['url']}", os.path.join(SHOTS, f"{key}-{k}.jpg")) else None
+                s["wayback"][k] = {"date": d, "checked": today, "fields": extract(got, cfg), "view": view, "shot": shot, "version": 2}
+            else: s["wayback"][k] = {"date": None, "checked": today, "note": got, "version": 2}
             time.sleep(1)
         _save_snaps(w["url"], s)
         print(f"  {w['name']}: checked", flush=True)
@@ -166,7 +233,7 @@ def for_dashboard():
         s = _load_snaps(w["url"])
         live = s.get("live", [])
         out.append({**w, "now": live[-1] if live else None, "prev": live[-2] if len(live) > 1 else None,
-                    "wayback": s.get("wayback", {}), "lastError": s.get("lastError")})
+                    "wayback": s.get("wayback", {}), "lastError": s.get("lastError"), "key": _key(w["url"])})
     return out
 
 
