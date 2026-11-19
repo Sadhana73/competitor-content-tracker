@@ -131,7 +131,22 @@
   .seg{display:inline-flex;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:3px}
   .seg button{border:none;background:transparent;padding:6px 14px;border-radius:8px;font-weight:500;color:var(--muted)}
   .seg button.on{background:#fff;color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(16,24,40,.08)}
-  .cal{display:grid;grid-template-columns:repeat(7,minmax(118px,1fr)) minmax(150px,1.1fr);min-width:1000px}
+  .cal{display:grid;grid-template-columns:repeat(7,minmax(118px,1fr));min-width:880px}
+  .cal .wrow{grid-column:1 / -1;border-bottom:1px solid var(--line);padding:14px 16px;cursor:pointer;display:grid;grid-template-columns:150px 1fr;gap:14px;align-items:center}
+  .cal .wrow:hover{background:#f9fafb}
+  .cal .wrow.sel{box-shadow:inset 0 0 0 2px var(--accent)}
+  .cal .wrow.future{background:repeating-linear-gradient(45deg,#fafbfc,#fafbfc 6px,#f2f4f7 6px,#f2f4f7 12px);cursor:default}
+  .cal .wrow .wl{font-weight:600;font-size:15px}
+  .cal .wrow .wl small{display:block;font-weight:500;font-size:12px;color:var(--muted);margin-top:2px}
+  .cal .wrow .evs{display:flex;flex-wrap:wrap;gap:6px}
+  .cal .wrow .ev{min-width:130px}
+  .cal .wrow .ev.zero{background:#fff;border:1px dashed var(--line);color:var(--muted)}
+  .cal .wrow .ev.zero.base{border-color:var(--missing);color:var(--missing);font-weight:600}
+  .cal .wrow .bars{grid-column:2;display:flex;gap:4px;align-items:flex-end;height:26px}
+  .cal .wrow .bars i{flex:1;background:rgba(23,92,211,.75);border-radius:3px 3px 0 0;min-height:2px;position:relative}
+  .cal .wrow .bars i.f{background:#e4e7ec}
+  .cal .wrow .bl{grid-column:2;display:flex;gap:4px;font-size:11px;color:var(--muted);margin-top:-10px}
+  .cal .wrow .bl span{flex:1;text-align:center}
   .cal .hd{padding:10px 12px;font-size:13px;font-weight:600;color:var(--muted);background:var(--soft);border-bottom:1px solid var(--line);text-align:right}
   .cal .hd.wk{text-align:left;border-left:1px solid var(--line)}
   .cal .day{min-height:132px;padding:8px 8px 10px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);cursor:pointer;display:flex;flex-direction:column;gap:4px}
@@ -297,6 +312,7 @@
       <select id="dMonth" aria-label="Month"></select>
       <span class="period" id="dPeriod"></span>
       <span style="flex:1"></span>
+      <div class="seg" id="dPer"><button data-p="day">Daily</button><button data-p="week">Weekly</button></div>
       <div class="seg" id="dMode"><button data-m="calendar">Calendar</button><button data-m="grid">Grid (1–30)</button></div>
       <div class="scale" id="dScale">Fewer <i style="background:#fff"></i><i id="sc1"></i><i id="sc2"></i><i id="sc3"></i><i id="sc4"></i> More</div>
     </div>
@@ -536,7 +552,8 @@ if(!window.TRACKER_DATA){
   dCat.innerHTML = `<option value="${ALL}">All categories</option>` + CATS.map(c=>`<option>${esc(c)}</option>`).join("");
   dMonth.innerHTML = monthSel.innerHTML; dMonth.value = curKey;
   let selCell = null; // {co, day} — co is null when a whole calendar day is clicked
-  let dMode = "calendar";
+  let dMode = "calendar", dPer = "day";
+  document.querySelectorAll("#dPer button").forEach(b=>b.onclick=()=>{ dPer=b.dataset.p; selCell=null; renderDaily(); });
   document.querySelectorAll("#dMode button").forEach(b=>b.onclick=()=>{ dMode=b.dataset.m; selCell=null; renderDaily(); });
   const HEAT = "23,92,211"; // blue
   const shade = (n,max) => { if(!n) return ""; const a = 0.14 + 0.86*Math.min(1, n/max);
@@ -561,8 +578,12 @@ if(!window.TRACKER_DATA){
     document.getElementById("calWrap").classList.toggle("hidden", !isCal);
     document.getElementById("gridWrap").classList.toggle("hidden", isCal);
     document.getElementById("dScale").style.display = isCal ? "none" : "";
+    document.getElementById("dPer").style.display = isCal ? "" : "none";
+    document.querySelectorAll("#dPer button").forEach(b=>b.classList.toggle("on", b.dataset.p===dPer));
     document.getElementById("dHelp").textContent = isCal
-      ? "Each day lists how many pages each company published. Each row is one week, with the week's totals on the right. Striped days are still to come. Click a day to see its pages."
+      ? (dPer==="week"
+        ? "Each row is one week: how many pages each company published that week, and a small bar for each day. Click a week to see its pages."
+        : "Each day lists how many pages each company published. Striped days are still to come. Click a day to see its pages. Switch to Weekly for week totals.")
       : "Each number is pages published that day. Grey columns are weekends; striped cells are days still to come. Click any cell to see those pages.";
 
     if(isCal){
@@ -571,30 +592,50 @@ if(!window.TRACKER_DATA){
       days.forEach(d=>cells.push(d));
       while(cells.length%7) cells.push(null);
       const tint = c => c + "1f";
-      let html = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(n=>`<div class="hd">${n}</div>`).join("") + `<div class="hd wk">Week total</div>`;
-      for(let w=0; w<cells.length/7; w++){
-        const week = cells.slice(w*7, w*7+7);
-        week.forEach(d=>{
+      const weeks = []; for(let w=0; w<cells.length/7; w++) weeks.push(cells.slice(w*7, w*7+7));
+      let html = "";
+      if(dPer==="day"){
+        html = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(n=>`<div class="hd">${n}</div>`).join("");
+        weeks.forEach(week=>week.forEach(d=>{
           if(d===null){ html += `<div class="day out"></div>`; return; }
           const isToday = partial && d===today;
           if(isFuture(d)){ html += `<div class="day future"><div class="top"><span></span><span class="dn">${d}</span></div></div>`; return; }
           const tot = COMPANIES.reduce((a,c)=>a+grid[c.name][d],0);
-          const sel = selCell && !selCell.co && selCell.day===d;
+          const sel = selCell && !selCell.co && selCell.day===d && !selCell.days;
           const evs = COMPANIES.filter(c=>grid[c.name][d]).map(c=>
             `<div class="ev" style="background:${tint(c.color)}"><span class="dot" style="background:${c.color}"></span><span class="nm">${esc(c.name)}</span><b>${grid[c.name][d]}</b></div>`).join("");
           html += `<div class="day ${isWe(d)?"we":""} ${sel?"sel":""}" data-day="${d}" title="Click to see the pages published on ${d} ${SHORT[m-1]}">
             <div class="top"><span class="tot">${tot? tot+" page"+(tot>1?"s":"") : ""}</span><span class="dn ${isToday?"today":""}">${d}</span></div>${evs}</div>`;
+        }));
+      } else {
+        weeks.forEach((week, wi)=>{
+          const inWeek = week.filter(d=>d!==null);
+          const done = inWeek.filter(d=>!isFuture(d));
+          const first = inWeek[0], last = inWeek[inWeek.length-1];
+          const label = `${first}–${last} ${SHORT[m-1]}`;
+          if(!done.length){ html += `<div class="wrow future"><div class="wl">${label}<small>Still to come</small></div><div></div></div>`; return; }
+          const stillGoing = done.length < inWeek.length;
+          const wk = COMPANIES.map(c=>({c, n: done.reduce((a,d)=>a+grid[c.name][d],0)}));
+          const tot = wk.reduce((a,x)=>a+x.n,0);
+          const dayTot = week.map(d=> d===null || isFuture(d) ? null : COMPANIES.reduce((a,c)=>a+grid[c.name][d],0));
+          const dmax = Math.max(1, ...dayTot.filter(x=>x!==null));
+          const sel = selCell && selCell.days && selCell.days[0]===first;
+          html += `<div class="wrow ${sel?"sel":""}" data-days="${done.join(",")}" title="Click to see the pages published ${label}">
+            <div class="wl">${label}${stillGoing?" (so far)":""}<small>${tot} page${tot===1?"":"s"} in total</small></div>
+            <div class="evs">${wk.map(x=> x.n
+              ? `<div class="ev" style="background:${tint(x.c.color)}"><span class="dot" style="background:${x.c.color}"></span><span class="nm">${esc(x.c.name)}</span><b>${x.n}</b></div>`
+              : `<div class="ev zero ${x.c.role==="baseline"?"base":""}"><span class="dot" style="background:${x.c.color}"></span><span class="nm">${esc(x.c.name)}</span><b>0</b></div>`).join("")}</div>
+            <div class="bars">${dayTot.map((n,i)=> week[i]===null ? `<i style="visibility:hidden"></i>` : n===null ? `<i class="f" style="height:2px"></i>` : `<i style="height:${Math.max(2, 26*n/dmax)}px" title="${"Sun Mon Tue Wed Thu Fri Sat".split(" ")[i]} ${week[i]}: ${n} page${n===1?"":"s"}"></i>`).join("")}</div>
+            <div class="bl">${week.map((d,i)=>`<span>${d===null?"":["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][i]+" "+d+(dayTot[i]?` · <b style="color:var(--ink)">${dayTot[i]}</b>`:"")}</span>`).join("")}</div>
+          </div>`;
         });
-        const inMonth = week.filter(d=>d!==null && !isFuture(d));
-        const first = week.find(d=>d!==null), last = [...week].reverse().find(d=>d!==null);
-        const stillGoing = week.some(d=>d!==null && isFuture(d));
-        if(!inMonth.length){ html += `<div class="wk"><div class="lbl">${first}–${last} ${SHORT[m-1]}</div><span class="meta" style="color:var(--muted)">Still to come</span></div>`; continue; }
-        const wk = COMPANIES.map(c=>({c, n: inMonth.reduce((a,d)=>a+grid[c.name][d],0)}));
-        const compTop = Math.max(0, ...wk.filter(x=>x.c.role!=="baseline").map(x=>x.n));
-        html += `<div class="wk"><div class="lbl">${first}–${last} ${SHORT[m-1]}${stillGoing?" (so far)":""}</div>${wk.map(x=>
-          `<div class="r ${x.c.role==="baseline"?"base":""}"><span><span class="dot" style="background:${x.c.color};margin-right:6px"></span>${esc(x.c.name)}</span><span class="${x.c.role==="baseline"&&x.n===0&&compTop>0?"z":""}">${x.n}</span></div>`).join("")}</div>`;
       }
       document.getElementById("cal").innerHTML = html;
+      document.querySelectorAll("#cal .wrow[data-days]").forEach(el=>el.onclick=()=>{
+        const ds = el.dataset.days.split(",").map(Number);
+        selCell = {co:null, day:ds[0], days:ds}; renderDaily();
+        document.getElementById("dayList").scrollIntoView({behavior:"smooth", block:"nearest"});
+      });
       document.querySelectorAll("#cal .day[data-day]").forEach(el=>el.onclick=()=>{
         selCell = {co:null, day:+el.dataset.day}; renderDaily();
         document.getElementById("dayList").scrollIntoView({behavior:"smooth", block:"nearest"});
@@ -627,14 +668,15 @@ if(!window.TRACKER_DATA){
     const box = document.getElementById("dayList");
     if(!selCell || selCell.day > nDays){ box.classList.add("hidden"); return; }
     const iso = `${key}-${String(selCell.day).padStart(2,"0")}`;
-    const hits = list.filter(p=>(!selCell.co || p.company===selCell.co) && p.published===iso)
+    const isoSet = new Set((selCell.days || [selCell.day]).map(d=>`${key}-${String(d).padStart(2,"0")}`));
+    const hits = list.filter(p=>(!selCell.co || p.company===selCell.co) && isoSet.has(p.published))
       .sort((a,b)=>COMPANIES.findIndex(c=>c.name===a.company)-COMPANIES.findIndex(c=>c.name===b.company));
     box.classList.remove("hidden");
-    box.innerHTML = `<div style="padding:12px 14px;border-bottom:1px solid var(--line)"><h3 style="margin:0">${selCell.co?esc(selCell.co):"All companies"} · ${fmtDate(iso)}
+    box.innerHTML = `<div style="padding:12px 14px;border-bottom:1px solid var(--line)"><h3 style="margin:0">${selCell.co?esc(selCell.co):"All companies"} · ${selCell.days ? `${selCell.days[0]}–${selCell.days[selCell.days.length-1]} ${SHORT[m-1]} ${y}` : fmtDate(iso)}
       <span class="meta">· ${cat===ALL?"All categories":esc(cat)} · ${hits.length} page${hits.length===1?"":"s"}</span></h3></div>` +
       (hits.length ? `<ul>${hits.map(p=>`<li><a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.title)}</a>
-        <span class="meta"><span class="dot" style="background:${color(p.company)};width:8px;height:8px;margin-right:4px"></span>${esc(p.company)}${cat===ALL?" · "+esc(p.category):""}${p.dateMissing?' · <span class="flag" style="margin:0">no publish date</span>':""}</span></li>`).join("")}</ul>`
-        : `<ul><li class="meta">No pages published that day.</li></ul>`);
+        <span class="meta"><span class="dot" style="background:${color(p.company)};width:8px;height:8px;margin-right:4px"></span>${esc(p.company)}${selCell.days?" · "+fmtDate(p.published):""}${cat===ALL?" · "+esc(p.category):""}${p.dateMissing?' · <span class="flag" style="margin:0">no publish date</span>':""}</span></li>`).join("")}</ul>`
+        : `<ul><li class="meta">No pages published ${selCell.days?"that week":"that day"}.</li></ul>`);
   }
   dCat.onchange = ()=>{ selCell=null; renderDaily(); };
   dMonth.onchange = ()=>{ selCell=null; renderDaily(); };
