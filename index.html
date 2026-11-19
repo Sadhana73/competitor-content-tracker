@@ -168,10 +168,14 @@
   .wbox.sel{box-shadow:inset 0 0 0 2px var(--accent)}
   .wbox.future{cursor:default;background:repeating-linear-gradient(45deg,#fafbfc,#fafbfc 6px,#f2f4f7 6px,#f2f4f7 12px)}
   .wbox .lbl{font-size:13px;color:var(--muted);font-weight:600;margin-bottom:4px}
-  .wbox .r{display:flex;justify-content:space-between;gap:8px}
+  .wbox .r{display:flex;justify-content:space-between;gap:8px;border-radius:6px;margin:0 -6px;padding:2px 6px}
   .wbox .r.base{font-weight:700}
   .wbox .r .z{color:var(--missing)}
-  .wbox .r.all{border-top:1px solid var(--line);padding-top:6px;margin-top:4px;font-weight:600}
+  .wbox .r.click{cursor:pointer}
+  .wbox .r.click:hover{background:#eef4ff}
+  .wbox .r.click:hover span:last-child{text-decoration:underline}
+  .wbox .r.on{background:#e0eaff}
+  .wbox .r.all{border-top:1px solid var(--line);border-radius:0 0 6px 6px;padding-top:7px;margin-top:4px;font-weight:600}
   .wchart{padding:16px 18px 10px}
   .wleg{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;margin-bottom:14px}
   .wleg i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px}
@@ -610,7 +614,7 @@ if(!window.TRACKER_DATA){
     document.querySelectorAll("#dPer button").forEach(b=>b.classList.toggle("on", b.dataset.p===dPer));
     document.getElementById("dHelp").textContent = isCal
       ? (dPer==="week"
-        ? "Each box is one week: how many pages each company published that week (Zoho CRM in red when it is 0 and competitors published). Striped weeks are still to come. Click a week to see its pages."
+        ? "Each box is one week: how many pages each company published that week (Zoho CRM in red when it is 0 and competitors published). Click a company to see its pages for that week, or All companies for every page. Striped weeks are still to come."
         : "Each day lists how many pages each company published. Striped days are still to come. Click a day to see its pages. Switch to Weekly for week totals.")
       : "Each number is pages published that day. Grey columns are weekends; striped cells are days still to come. Click any cell to see those pages.";
 
@@ -649,15 +653,17 @@ if(!window.TRACKER_DATA){
           if(!w.done.length) return `<div class="wbox future">${head}<span class="meta" style="color:var(--muted)">Still to come</span></div>`;
           const ct = compTopAll(w);
           return `<div class="wbox ${sel?"sel":""}" data-days="${w.done.join(",")}" title="Click to see the pages published ${w.first}–${w.last} ${SHORT[m-1]}">${head}
-            ${w.vals.map(v=>`<div class="r ${v.c.role==="baseline"?"base":""}"><span><span class="dot" style="background:${v.c.color};margin-right:6px"></span>${esc(v.c.name)}</span><span class="${v.c.role==="baseline"&&v.n===0&&ct>0?"z":""}">${v.n}</span></div>`).join("")}
-            <div class="r all"><span>All companies</span><span>${tot}</span></div></div>`;
+            ${w.vals.map(v=>`<div class="r ${v.c.role==="baseline"?"base":""} ${v.n?"click":""} ${sel&&selCell.co===v.c.name?"on":""}" ${v.n?`data-co="${esc(v.c.name)}" title="See the ${v.n} ${esc(v.c.name)} page${v.n===1?"":"s"} from this week"`:""}><span><span class="dot" style="background:${v.c.color};margin-right:6px"></span>${esc(v.c.name)}</span><span class="${v.c.role==="baseline"&&v.n===0&&ct>0?"z":""}">${v.n}</span></div>`).join("")}
+            <div class="r all click ${sel&&!selCell.co?"on":""}" data-co="" title="See all pages from this week"><span>All companies</span><span>${tot}</span></div></div>`;
         }).join("")}</div>`;
       }
       document.getElementById("cal").style.gridTemplateColumns = dPer==="week" ? "1fr" : "";
       document.getElementById("cal").innerHTML = html;
-      document.querySelectorAll("#cal .wbox[data-days]").forEach(el=>el.onclick=()=>{
+      document.querySelectorAll("#cal .wbox[data-days]").forEach(el=>el.onclick=e=>{
         const ds = el.dataset.days.split(",").map(Number);
-        selCell = {co:null, day:ds[0], days:ds}; renderDaily();
+        const row = e.target.closest(".r[data-co]");
+        if(e.target.closest(".r") && !row) return;            // a company with 0 pages: nothing to show
+        selCell = {co: row && row.dataset.co ? row.dataset.co : null, day:ds[0], days:ds}; renderDaily();
         document.getElementById("dayList").scrollIntoView({behavior:"smooth", block:"nearest"});
       });
       document.querySelectorAll("#cal .day[data-day]:not([data-days])").forEach(el=>el.onclick=()=>{
