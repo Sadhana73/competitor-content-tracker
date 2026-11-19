@@ -888,8 +888,15 @@ if(!window.TRACKER_DATA){
       };
       el("wCheck").onclick = () => window.__startJob && window.__startJob("/api/watch/check");
     }
-    const k = el("wCmp").value;
+    const picked = el("wCmp").value;
+    const ORDER = ["wb90","wb30","wb365","prev"];
+    const has = (w, key) => { const t = key === "prev" ? w.prev : (w.wayback||{})[key]; return t && t.fields; };
     el("wList").innerHTML = W.length ? W.map(w=>{
+      let k = picked, note = "";
+      if(w.now && !has(w, k)){                              // nothing to compare with: use the nearest copy that exists
+        const alt = [picked, ...ORDER].find(x => has(w, x));
+        if(alt && alt !== picked){ k = alt; note = `<div class="help" style="margin:6px 0 0">No copy for the option you picked, so this shows the comparison with <b>${el("wCmp").querySelector(`option[value="${alt}"]`).textContent.replace("Compare with: ","")}</b>.</div>`; }
+      }
       const now = w.now, then = k === "prev" ? w.prev : (w.wayback||{})[k];
       let body;
       if(!now) body = `<div class="wempty">Not checked yet. ${live?"Click <b>Check now</b>.":""}</div>`;
@@ -914,6 +921,7 @@ if(!window.TRACKER_DATA){
         <figure><figcaption>Earlier · ${then && then.date ? fmtDate(then.date) : "—"}</figcaption>${then && then.shot ? `<img loading="lazy" src="${shotSrc(then.shot)}" alt="Earlier screenshot">` : `<div class="noshot">No screenshot for this copy yet.</div>`}</figure>
         <figure><figcaption>Now · ${now ? fmtDate(now.date) : "—"}</figcaption>${now && now.shot ? `<img loading="lazy" src="${shotSrc(now.shot)}" alt="Current screenshot">` : `<div class="noshot">No screenshot yet.</div>`}</figure>
       </div>`;
+      body = note + body;
       if(w.lastError) body = `<div class="wempty" style="color:var(--missing)">Last check on ${fmtDate(w.lastError.date)}: ${esc(w.lastError.note)}. ${now?"Showing the last successful check.":""}</div>` + body;
       const when = now ? `checked ${fmtDate(now.date)}` + (then && then.date ? ` · compared with ${fmtDate(then.date)}` : "") : "";
       return `<div class="wcard"><h3>${esc(w.name)} <a class="u" href="${esc(w.url)}" target="_blank" rel="noopener">${esc(w.url)}</a>

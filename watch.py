@@ -160,7 +160,12 @@ def screenshot(url, out):
             b = pw.chromium.launch()
             pg = b.new_page(viewport={"width": 1280, "height": 900}, user_agent=collect.UA)
             pg.goto(url, wait_until="domcontentloaded", timeout=45000)
-            pg.wait_for_timeout(3500)
+            pg.wait_for_timeout(3000)
+            for label in ("Decline All", "Reject All", "Accept All", "Accept all", "Accept", "I agree", "Got it"):   # close cookie banners
+                try:
+                    btn = pg.get_by_role("button", name=label, exact=True)
+                    if btn.count(): btn.first.click(timeout=1500); pg.wait_for_timeout(800); break
+                except Exception: pass
             os.makedirs(os.path.dirname(out), exist_ok=True)
             pg.screenshot(path=out, type="jpeg", quality=65, full_page=False)
             b.close()
