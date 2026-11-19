@@ -221,6 +221,12 @@
   .c-rem{background:var(--missing-bg);color:var(--missing);text-decoration:line-through}
   .c-add{background:var(--comp-bg);color:var(--comp)}
   .c-old{color:#667085} .c-new{color:var(--ink);font-weight:600}
+  .wpick{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+  .wpick button{font-size:14px;padding:8px 16px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--ink);cursor:pointer}
+  .wpick button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .wpick .n{display:inline-block;margin-left:6px;font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px;background:var(--behind-bg);color:var(--behind)}
+  .wpick button.on .n{background:#fff;color:var(--ink)}
+  .shotnote{font-size:12px;color:var(--muted);padding:6px 10px}
   .wlinks{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
   .wlinks button,.wlinks a{font-size:12px;padding:5px 10px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink)}
   .shots{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
@@ -860,6 +866,8 @@ if(!window.TRACKER_DATA){
     return rows;
   }
   const fmtVal = v => Array.isArray(v) ? (v.length ? v.map(esc).join(" · ") : "—") : (v===undefined||v===""||v===null ? "—" : esc(String(v)));
+  let wSel = 0;
+  const _rd = f => !!(f && (f.title || (f.h1||[]).length || f.description));
   function renderWatch(){
     const live = DATA.live && /^https?:/.test(location.protocol) && !DATA.hosted;
     const W = DATA.watch || [];
@@ -891,7 +899,11 @@ if(!window.TRACKER_DATA){
     const picked = el("wCmp").value;
     const ORDER = ["wb30","wb90","wb365","prev"];
     const has = (w, key) => { const t = key === "prev" ? w.prev : (w.wayback||{})[key]; return t && t.fields; };
-    el("wList").innerHTML = W.length ? W.map(w=>{
+    if(wSel >= W.length) wSel = 0;
+    const changeCount = w => { const t = (w.wayback||{})[picked] || (w.wayback||{}).wb30; return w.now && t && _rd(t.fields) ? watchRows(t.fields, w.now.fields).length : null; };
+    const picker = W.length > 1 ? `<div class="wpick">${W.map((w,i)=>{ const n = changeCount(w);
+        return `<button data-i="${i}" class="${i===wSel?"on":""}">${esc(w.name)}${n ? `<span class="n">${n} change${n>1?"s":""}</span>` : ""}</button>`; }).join("")}</div>` : "";
+    el("wList").innerHTML = picker + (W.length ? [W[wSel]].map(w=>{
       let k = picked, note = "";
       if(w.now && !has(w, k)){                              // nothing to compare with: use the nearest copy that exists
         const alt = [picked, ...ORDER].find(x => has(w, x));
@@ -902,6 +914,7 @@ if(!window.TRACKER_DATA){
       if(!now) body = `<div class="wempty">Not checked yet. ${live?"Click <b>Check now</b>.":""}</div>`;
       else if(!then) body = `<div class="wempty">${k==="prev" ? "Only one check so far. Changes appear after the next check." : "Not looked up yet."}</div>`;
       else if(!then.fields) body = `<div class="wempty">No earlier copy: ${esc(then.note || "not available")}.</div>`;
+      else if(!_rd(then.fields)) body = `<div class="wempty">The Wayback Machine copy from ${fmtDate(then.date)} was found, but its text couldn't be read, so there is no table for it. The screenshots below show how the page looked. Try another option in <b>Compare with</b>.</div>`;
       else {
         const rows = watchRows(then.fields, now.fields);
         body = (rows.length
@@ -913,13 +926,13 @@ if(!window.TRACKER_DATA){
       const shotSrc = f => f ? (DATA.hosted ? "shots/" : "data/watch-shots/") + f : null;
       const hasShots = now && (now.shot || (then && then.shot));
       body += `<div class="wlinks">
-        ${hasShots ? `<button class="wShots" data-i="${W.indexOf(w)}">View screenshots: earlier | now</button>` : ""}
+        ${hasShots ? `<button class="wShots" data-i="${W.indexOf(w)}">Hide screenshots</button>` : ""}
         <a href="${esc(w.url)}" target="_blank" rel="noopener">Open live page ↗</a>
         ${then && then.view ? `<a href="${esc(then.view)}" target="_blank" rel="noopener">Open Wayback copy (${fmtDate(then.date)}) ↗</a>` : ""}
       </div>
-      <div class="shots hidden" id="shots-${W.indexOf(w)}">
+      <div class="shots" id="shots-${W.indexOf(w)}">
         <figure><figcaption>Earlier · ${then && then.date ? fmtDate(then.date) : "—"}</figcaption>${then && then.shot ? `<img loading="lazy" src="${shotSrc(then.shot)}" alt="Earlier screenshot">` : `<div class="noshot">No screenshot for this copy yet.</div>`}</figure>
-        <figure><figcaption>Now · ${now ? fmtDate(now.date) : "—"}</figcaption>${now && now.shot ? `<img loading="lazy" src="${shotSrc(now.shot)}" alt="Current screenshot">` : `<div class="noshot">No screenshot yet.</div>`}</figure>
+        <figure><figcaption>Now · ${now ? fmtDate(now.date) : "—"}</figcaption>${now && now.shot ? `<img loading="lazy" src="${shotSrc(now.shot)}" alt="Current screenshot">` : `<div class="noshot">No screenshot yet.</div>`}${now && now.shotNote ? `<div class="shotnote">${esc(now.shotNote)}</div>` : ""}</figure>
       </div>`;
       body = note + body;
       if(w.lastError) body = `<div class="wempty" style="color:var(--missing)">Last check on ${fmtDate(w.lastError.date)}: ${esc(w.lastError.note)}. ${now?"Showing the last successful check.":""}</div>` + body;
@@ -927,7 +940,8 @@ if(!window.TRACKER_DATA){
       return `<div class="wcard"><h3>${esc(w.name)} <a class="u" href="${esc(w.url)}" target="_blank" rel="noopener">${esc(w.url)}</a>
         <span class="gap" style="margin-left:auto;font-weight:500">${when}</span>
         ${live?`<button class="wRem" data-url="${esc(w.url)}" style="font-size:12px;padding:4px 10px">Remove</button>`:""}</h3>${body}</div>`;
-    }).join("") : (live ? `<div class="wempty">No pages watched yet. Paste an address above, for example a competitor's home page, and click <b>Add page</b>.</div>` : "");
+    }).join("") : "") + (W.length ? "" : (live ? `<div class="wempty">No pages watched yet. Paste an address above, for example a competitor's home page, and click <b>Add page</b>.</div>` : ""));
+    document.querySelectorAll(".wpick button").forEach(b=>b.onclick=()=>{ wSel = +b.dataset.i; renderWatch(); });
     if(DATA.hosted && W.length) el("wList").insertAdjacentHTML("afterbegin", `<div class="help" style="margin:-4px 0 12px">To stop watching a page, remove it from <a href="https://github.com/${esc(CFG.githubRepo)}/blob/main/data/watch.json" target="_blank" rel="noopener">data/watch.json</a> on GitHub.</div>`);
     document.querySelectorAll(".wShots").forEach(b=>b.onclick=()=>{
       const box = el("shots-"+b.dataset.i); const open = box.classList.toggle("hidden") === false;

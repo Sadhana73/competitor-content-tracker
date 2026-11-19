@@ -69,11 +69,28 @@ def save_store(pages):
 
 
 # ---------------------------------------------------------------- helpers
+def _unzip(raw, encoding=""):
+    """Some servers (and Wayback Machine copies) send compressed bytes even when we didn't ask. Unpack them."""
+    import zlib
+    try:
+        if raw[:2] == b"\x1f\x8b" or "gzip" in encoding:
+            return zlib.decompressobj(16 + zlib.MAX_WBITS).decompress(raw)
+        if "deflate" in encoding:
+            return zlib.decompressobj().decompress(raw)
+        if "br" in encoding:
+            import brotli
+            return brotli.decompress(raw)
+    except Exception:
+        pass
+    return raw
+
+
 def fetch(url, timeout=20):
     try:
         req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept": "*/*"})
         with urllib.request.urlopen(req, timeout=timeout) as r:
-            raw = r.read(4_000_000)
+            raw = r.read(8_000_000)
+            raw = _unzip(raw, (r.headers.get("Content-Encoding") or "").lower())
             enc = r.headers.get_content_charset() or "utf-8"
             return raw.decode(enc, "replace"), r.geturl()
     except Exception as e:

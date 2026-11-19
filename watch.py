@@ -160,28 +160,47 @@ def extract(doc, cfg):
 # ---------------------------------------------------------------- screenshots (on GitHub; skipped if the browser isn't installed)
 SHOTS = os.path.join(HERE, "data", "watch-shots")
 
+BLOCK_SIGNS = re.compile(r"access denied|you don't have permission to access|attention required|just a moment|"
+                         r"verify you are (a )?human|are you a robot|request blocked|pardon our interruption", re.I)
+
 def screenshot(url, out):
+    """Open the page in a real browser, save a screenshot, and return (status, html).
+    status: "ok", "blocked" (the site refused automated visitors) or "failed"."""
     try:
         from playwright.sync_api import sync_playwright
     except Exception:
-        return False
+        return "failed", None
     try:
         with sync_playwright() as pw:
-            b = pw.chromium.launch()
-            pg = b.new_page(viewport={"width": 1280, "height": 900}, user_agent=collect.UA)
-            pg.goto(url, wait_until="domcontentloaded", timeout=45000)
+            b = pw.chromium.launch(args=["--disable-blink-features=AutomationControlled"])
+            ctx = b.new_context(viewport={"width": 1280, "height": 900}, user_agent=collect.UA, locale="en-US",
+                                extra_http_headers={"Accept-Language": "en-US,en;q=0.9"})
+            ctx.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+            pg = ctx.new_page()
+            pg.goto(url, wait_until="domcontentloaded", timeout=60000)
+            try: pg.wait_for_load_state("networkidle", timeout=15000)   # let pictures and the main banner finish loading
+            except Exception: pass
             pg.wait_for_timeout(3000)
             for label in ("Decline All", "Reject All", "Accept All", "Accept all", "Accept", "I agree", "Got it"):   # close cookie banners
                 try:
                     btn = pg.get_by_role("button", name=label, exact=True)
                     if btn.count(): btn.first.click(timeout=1500); pg.wait_for_timeout(800); break
                 except Exception: pass
+            head = (pg.title() or "") + " " + (pg.inner_text("body", timeout=5000) or "")[:600]
+            doc = pg.content()
+            if BLOCK_SIGNS.search(head) and len(head) < 900:
+                b.close(); return "blocked", None
             os.makedirs(os.path.dirname(out), exist_ok=True)
             pg.screenshot(path=out, type="jpeg", quality=65, full_page=False)
             b.close()
-        return True
+        return "ok", doc
     except Exception as e:
-        print(f"    screenshot skipped ({type(e).__name__})", flush=True); return False
+        print(f"    screenshot skipped ({type(e).__name__})", flush=True); return "failed", None
+
+
+def _readable(f):
+    """True when the text of a copy was actually read (not an empty or garbled download)."""
+    return bool(f and (f.get("title") or f.get("h1") or f.get("description")))
 
 
 # ---------------------------------------------------------------- checking
@@ -225,23 +244,37 @@ def check_all():
         s.pop("lastError", None)
         fields = extract(doc, cfg)
         key = _key(w["url"])
-        shot_now = f"{key}-now.jpg" if screenshot(w["url"], os.path.join(SHOTS, f"{key}-now.jpg")) else None
-        s["live"] = [x for x in s["live"] if x["date"] != today] + [{"date": today, "fields": fields, "shot": shot_now}]
+        st, rendered = screenshot(w["url"], os.path.join(SHOTS, f"{key}-now.jpg"))
+        if not _readable(fields) and rendered: fields = extract(rendered, cfg)
+        entry = {"date": today, "fields": fields, "shot": f"{key}-now.jpg" if st == "ok" else None}
+        if st == "blocked":                             # the site turns away automated browsers: use the newest Wayback picture instead
+            d, _ = wayback_copy(w["url"], 0)
+            if d and screenshot(f"https://web.archive.org/web/{d.replace('-', '')}if_/{w['url']}", os.path.join(SHOTS, f"{key}-now.jpg"))[0] == "ok":
+                entry["shot"] = f"{key}-now.jpg"
+                entry["shotNote"] = f"This site blocks automatic screenshots, so this picture is the newest Wayback Machine copy ({d})."
+            else:
+                entry["shotNote"] = "This site blocks automatic screenshots."
+        s["live"] = [x for x in s["live"] if x["date"] != today] + [entry]
         s["live"] = s["live"][-30:]
         for k, days in WAYBACK_AGES.items():
             old = s["wayback"].get(k)
-            if old and old.get("checked") == today and old.get("version") == 2: continue   # at most once a day
+            if old and old.get("checked") == today and old.get("version") == 3: continue   # at most once a day
             d, got = wayback_copy(w["url"], days)
             if not d:                                   # the Wayback Machine is often slow: wait and try once more
                 time.sleep(8); d, got = wayback_copy(w["url"], days)
             if d:
                 ts = d.replace("-", "")
                 view = f"https://web.archive.org/web/{ts}/{w['url']}"
-                shot = f"{key}-{k}.jpg" if screenshot(f"https://web.archive.org/web/{ts}if_/{w['url']}", os.path.join(SHOTS, f"{key}-{k}.jpg")) else None
-                s["wayback"][k] = {"date": d, "checked": today, "fields": extract(got, cfg), "view": view, "shot": shot, "version": 2}
+                st, rendered = screenshot(f"https://web.archive.org/web/{ts}if_/{w['url']}", os.path.join(SHOTS, f"{key}-{k}.jpg"))
+                f = extract(got, cfg)
+                if not _readable(f) and rendered: f = extract(rendered, cfg)      # read it from the browser copy instead
+                s["wayback"][k] = {"date": d, "checked": today, "fields": f, "view": view,
+                                   "shot": f"{key}-{k}.jpg" if st == "ok" else None, "version": 3}
+                if not _readable(f): s["wayback"][k]["unreadable"] = True
+                print(f"    {k}: copy from {d} " + ("read" if _readable(f) else "saved, but its text couldn't be read"), flush=True)
             elif old and old.get("fields"):            # keep the last good copy rather than losing it
                 old["lastTry"] = {"date": today, "note": got}
-            else: s["wayback"][k] = {"date": None, "checked": today, "note": got, "version": 2}
+            else: s["wayback"][k] = {"date": None, "checked": today, "note": got, "version": 3}
             time.sleep(1)
         _save_snaps(w["url"], s)
         print(f"  {w['name']}: checked", flush=True)
