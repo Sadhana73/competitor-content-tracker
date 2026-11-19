@@ -4,6 +4,11 @@
    "url": "https://www.hubspot.com/",
    "name": "hubspot.com home page",
    "added": "2026-11-19"
+  },
+  {
+   "url": "https://www.salesforce.com/",
+   "name": "Salesforce home page",
+   "added": "2026-11-19"
   }
  ]
 }
