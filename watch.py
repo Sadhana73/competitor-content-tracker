@@ -270,7 +270,7 @@ def check_all():
         s["live"] = s["live"][-30:]
         for k, days in WAYBACK_AGES.items():
             old = s["wayback"].get(k)
-            if old and old.get("checked") == today and old.get("version") == 3: continue   # at most once a day
+            if old and old.get("checked") == today and old.get("version") == 4: continue   # at most once a day
             d, got = wayback_copy(w["url"], days)
             if not d:                                   # the Wayback Machine is often slow: wait and try once more
                 time.sleep(8); d, got = wayback_copy(w["url"], days)
@@ -281,12 +281,12 @@ def check_all():
                 f = extract(got, cfg)
                 if not _readable(f) and rendered: f = extract(rendered, cfg)      # read it from the browser copy instead
                 s["wayback"][k] = {"date": d, "checked": today, "fields": f, "view": view,
-                                   "shot": f"{key}-{k}.jpg" if st == "ok" else None, "version": 3}
+                                   "shot": f"{key}-{k}.jpg" if st == "ok" else None, "version": 4}
                 if not _readable(f): s["wayback"][k]["unreadable"] = True
                 print(f"    {k}: copy from {d} " + ("read" if _readable(f) else "saved, but its text couldn't be read"), flush=True)
             elif old and old.get("fields"):            # keep the last good copy rather than losing it
                 old["lastTry"] = {"date": today, "note": got}
-            else: s["wayback"][k] = {"date": None, "checked": today, "note": got, "version": 3}
+            else: s["wayback"][k] = {"date": None, "checked": today, "note": got, "version": 4}
             time.sleep(1)
         _save_snaps(w["url"], s)
         print(f"  {w['name']}: checked", flush=True)
