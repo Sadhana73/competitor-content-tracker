@@ -7,3 +7,6 @@ data/*.tmp
 Competitor Content Tracker.html
 untitled folder/
 site/
+
+# preview pictures
+*-preview*.png
