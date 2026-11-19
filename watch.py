@@ -25,9 +25,19 @@ AI_HINTS = re.compile(r"llms?(-full)?\.txt|ai[-_ ]?(info|instructions|policy|usa
 
 
 # ---------------------------------------------------------------- the watch list
+def same_page(u):
+    """hubspot.com, www.hubspot.com and https://www.hubspot.com/ are the same page."""
+    p = urllib.parse.urlparse(u if "://" in u else "https://" + u)
+    return p.netloc.lower().removeprefix("www.") + (p.path.rstrip("/") or "/") + (("?" + p.query) if p.query else "")
+
 def load_list():
-    if os.path.exists(LIST): return json.load(open(LIST, encoding="utf-8"))
-    return {"pages": []}
+    w = json.load(open(LIST, encoding="utf-8")) if os.path.exists(LIST) else {"pages": []}
+    seen, keep = set(), []
+    for x in w["pages"]:                      # drop duplicates such as hubspot.com vs www.hubspot.com (keep the first)
+        k = same_page(x["url"])
+        if k not in seen: seen.add(k); keep.append(x)
+    w["pages"] = keep
+    return w
 
 def save_list(w):
     os.makedirs(os.path.dirname(LIST), exist_ok=True)
@@ -42,7 +52,7 @@ def clean_url(u):
 
 def add_page(url, name=""):
     w = load_list(); url = clean_url(url)
-    if any(x["url"] == url for x in w["pages"]): return url, False
+    if any(same_page(x["url"]) == same_page(url) for x in w["pages"]): return url, False
     host = urllib.parse.urlparse(url).netloc.replace("www.", "")
     w["pages"].append({"url": url, "name": name.strip() or host + (urllib.parse.urlparse(url).path if urllib.parse.urlparse(url).path != "/" else " home page"),
                        "added": collect.today_ist()})
@@ -201,7 +211,8 @@ def wayback_copy(url, days_ago):
 
 def check_all():
     cfg = collect.load_config()
-    pages = load_list()["pages"]
+    w = load_list(); save_list(w)              # saves the list with any duplicates removed
+    pages = w["pages"]
     if not pages: print("Page watch: no pages added yet."); return
     print(f"Page watch: checking {len(pages)} page(s)…", flush=True)
     today = collect.today_ist()
