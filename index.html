@@ -161,7 +161,22 @@
   .cal .tot{font-size:12px;color:var(--muted);font-weight:500}
   .cal .dn{font-size:17px;font-weight:600;min-width:30px;height:30px;line-height:30px;text-align:center;border-radius:50%}
   .cal .dn.today{background:var(--accent);color:#fff}
-  .cal .wkc{min-height:230px}
+  .wchart{padding:16px 18px 10px}
+  .wleg{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;margin-bottom:14px}
+  .wleg i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+  .wgroups{display:flex;gap:14px}
+  .wg{flex:1;border-radius:10px;padding:8px 8px 6px;cursor:pointer;border:1px solid transparent}
+  .wg:hover{background:#f9fafb;border-color:var(--line)}
+  .wg.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+  .wg.future{cursor:default;background:repeating-linear-gradient(45deg,#fafbfc,#fafbfc 6px,#f2f4f7 6px,#f2f4f7 12px)}
+  .wbars{display:flex;align-items:flex-end;gap:4px;border-bottom:1px solid var(--line);position:relative}
+  .wbars .soon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px}
+  .wb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;min-width:0}
+  .wb i{display:block;width:100%;max-width:30px;border-radius:4px 4px 0 0}
+  .wb .v{font-size:12px;font-weight:600;margin-bottom:3px;font-variant-numeric:tabular-nums}
+  .wb .v.z{color:var(--missing)}
+  .wlab{text-align:center;font-weight:600;font-size:14px;margin-top:8px}
+  .wlab small{display:block;font-weight:500;font-size:12px;color:var(--muted);margin-top:2px}
   .cal .wkc .dn{width:auto;min-width:0;padding:0 10px;border-radius:15px;font-size:15px}
   .ev{display:flex;align-items:center;gap:6px;border-radius:6px;padding:3px 7px;font-size:13px;line-height:1.3}
   .ev .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -584,7 +599,7 @@ if(!window.TRACKER_DATA){
     document.querySelectorAll("#dPer button").forEach(b=>b.classList.toggle("on", b.dataset.p===dPer));
     document.getElementById("dHelp").textContent = isCal
       ? (dPer==="week"
-        ? "Each box is one week of the month, with how many pages each company published that week. Striped weeks are still to come. Click a week to see its pages."
+        ? "Each group of bars is one week; each bar is one company, with its number of pages on top (Zoho CRM in red when it is 0). Click a week to see its pages."
         : "Each day lists how many pages each company published. Striped days are still to come. Click a day to see its pages. Switch to Weekly for week totals.")
       : "Each number is pages published that day. Grey columns are weekends; striped cells are days still to come. Click any cell to see those pages.";
 
@@ -610,24 +625,30 @@ if(!window.TRACKER_DATA){
             <div class="top"><span class="tot">${tot? tot+" page"+(tot>1?"s":"") : ""}</span><span class="dn ${isToday?"today":""}">${d}</span></div>${evs}</div>`;
         }));
       } else {
-        html = weeks.map((week,wi)=>{ const ds = week.filter(d=>d!==null);
-          return `<div class="hd" style="text-align:left">Week ${wi+1} <span style="font-weight:500">· ${ds[0]}–${ds[ds.length-1]} ${SHORT[m-1]}</span></div>`; }).join("");
-        weeks.forEach(week=>{
+        const W = weeks.map((week,wi)=>{
           const inWeek = week.filter(d=>d!==null), done = inWeek.filter(d=>!isFuture(d));
-          const first = inWeek[0], last = inWeek[inWeek.length-1];
-          const hasToday = partial && inWeek.includes(today);
-          if(!done.length){ html += `<div class="day future wkc"><div class="top"><span class="tot">Still to come</span><span class="dn">${first}–${last}</span></div></div>`; return; }
-          const tot = COMPANIES.reduce((a,c)=>a+done.reduce((x,d)=>x+grid[c.name][d],0),0);
-          const sel = selCell && selCell.days && selCell.days[0]===first;
-          const evs = COMPANIES.map(c=>({c, n: done.reduce((x,d)=>x+grid[c.name][d],0)})).filter(x=>x.n).map(x=>
-            `<div class="ev" style="background:${tint(x.c.color)}"><span class="dot" style="background:${x.c.color}"></span><span class="nm">${esc(x.c.name)}</span><b>${x.n}</b></div>`).join("");
-          html += `<div class="day wkc ${sel?"sel":""}" data-days="${done.join(",")}" title="Click to see the pages published ${first}–${last} ${SHORT[m-1]}">
-            <div class="top"><span class="tot">${tot? tot+" page"+(tot>1?"s":"") : ""}${done.length<inWeek.length?" (so far)":""}</span><span class="dn ${hasToday?"today":""}">${first}–${last}</span></div>${evs}</div>`;
+          return {wi, first: inWeek[0], last: inWeek[inWeek.length-1], done, partial: done.length && done.length<inWeek.length,
+                  vals: COMPANIES.map(c=>({c, n: done.reduce((x,d)=>x+grid[c.name][d],0)}))};
         });
+        const top = Math.max(1, ...W.flatMap(w=>w.vals.map(v=>v.n)));
+        const H = 220;
+        html = `<div class="wchart">
+          <div class="wleg">${COMPANIES.map(c=>`<span><i style="background:${c.color}"></i>${esc(c.name)}</span>`).join("")}</div>
+          <div class="wgroups">${W.map(w=>{
+            const tot = w.vals.reduce((a,v)=>a+v.n,0);
+            const sel = selCell && selCell.days && selCell.days[0]===w.first;
+            if(!w.done.length) return `<div class="wg future"><div class="wbars" style="height:${H}px"><span class="soon">Still to come</span></div>
+              <div class="wlab">Week ${w.wi+1}<small>${w.first}–${w.last} ${SHORT[m-1]}</small></div></div>`;
+            return `<div class="wg ${sel?"sel":""}" data-days="${w.done.join(",")}" title="Click to see the pages published ${w.first}–${w.last} ${SHORT[m-1]}">
+              <div class="wbars" style="height:${H}px">${w.vals.map(v=>`<div class="wb" title="${esc(v.c.name)}: ${v.n} page${v.n===1?"":"s"}">
+                <span class="v ${v.n===0&&v.c.role==="baseline"?"z":""}">${v.n}</span>
+                <i style="height:${v.n? Math.max(4, (H-26)*v.n/top) : 2}px;background:${v.n? v.c.color : "#d0d5dd"}"></i></div>`).join("")}</div>
+              <div class="wlab">Week ${w.wi+1}${w.partial?" (so far)":""}<small>${w.first}–${w.last} ${SHORT[m-1]} · ${tot} page${tot===1?"":"s"}</small></div></div>`;
+          }).join("")}</div></div>`;
       }
-      document.getElementById("cal").style.gridTemplateColumns = dPer==="week" ? `repeat(${weeks.length},minmax(150px,1fr))` : "";
+      document.getElementById("cal").style.gridTemplateColumns = dPer==="week" ? "1fr" : "";
       document.getElementById("cal").innerHTML = html;
-      document.querySelectorAll("#cal .day[data-days]").forEach(el=>el.onclick=()=>{
+      document.querySelectorAll("#cal .wg[data-days]").forEach(el=>el.onclick=()=>{
         const ds = el.dataset.days.split(",").map(Number);
         selCell = {co:null, day:ds[0], days:ds}; renderDaily();
         document.getElementById("dayList").scrollIntoView({behavior:"smooth", block:"nearest"});
