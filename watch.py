@@ -163,6 +163,15 @@ SHOTS = os.path.join(HERE, "data", "watch-shots")
 BLOCK_SIGNS = re.compile(r"access denied|you don't have permission to access|attention required|just a moment|"
                          r"verify you are (a )?human|are you a robot|request blocked|pardon our interruption", re.I)
 
+HIDE_OVERLAYS = """
+[id*="chat" i],[class*="chat" i]:not(body):not(html),[id*="embeddedMessaging" i],[class*="embeddedMessaging" i],
+[class*="embedded-messaging" i],[id*="agentforce" i][class*="widget" i],[class*="agentforce-chat" i],
+[id*="intercom" i],[class*="intercom" i],[id*="drift" i],[class*="drift-" i],[id*="hubspot-messages" i],
+#hubspot-messages-iframe-container,[id*="onetrust" i],[class*="onetrust" i],[id*="cookie" i],[class*="cookie-banner" i],
+iframe[title*="chat" i],iframe[title*="messaging" i],iframe[src*="chat" i],
+#wm-ipp-base,#wm-ipp,#donato,#wm-ipp-print{display:none !important;visibility:hidden !important}
+"""
+
 def screenshot(url, out):
     """Open the page in a real browser, save a screenshot, and return (status, html).
     status: "ok", "blocked" (the site refused automated visitors) or "failed"."""
@@ -186,6 +195,9 @@ def screenshot(url, out):
                     btn = pg.get_by_role("button", name=label, exact=True)
                     if btn.count(): btn.first.click(timeout=1500); pg.wait_for_timeout(800); break
                 except Exception: pass
+            try: pg.add_style_tag(content=HIDE_OVERLAYS)          # chat pop-ups and widgets that cover the page
+            except Exception: pass
+            pg.wait_for_timeout(500)
             head = (pg.title() or "") + " " + (pg.inner_text("body", timeout=5000) or "")[:600]
             doc = pg.content()
             if BLOCK_SIGNS.search(head) and len(head) < 900:
