@@ -161,6 +161,8 @@
   .cal .tot{font-size:12px;color:var(--muted);font-weight:500}
   .cal .dn{font-size:17px;font-weight:600;min-width:30px;height:30px;line-height:30px;text-align:center;border-radius:50%}
   .cal .dn.today{background:var(--accent);color:#fff}
+  .cal .wkc{min-height:230px}
+  .cal .wkc .dn{width:auto;min-width:0;padding:0 10px;border-radius:15px;font-size:15px}
   .ev{display:flex;align-items:center;gap:6px;border-radius:6px;padding:3px 7px;font-size:13px;line-height:1.3}
   .ev .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .ev b{font-variant-numeric:tabular-nums}
@@ -582,7 +584,7 @@ if(!window.TRACKER_DATA){
     document.querySelectorAll("#dPer button").forEach(b=>b.classList.toggle("on", b.dataset.p===dPer));
     document.getElementById("dHelp").textContent = isCal
       ? (dPer==="week"
-        ? "Each row is one week: how many pages each company published that week, and a small bar for each day. Click a week to see its pages."
+        ? "Each box is one week of the month, with how many pages each company published that week. Striped weeks are still to come. Click a week to see its pages."
         : "Each day lists how many pages each company published. Striped days are still to come. Click a day to see its pages. Switch to Weekly for week totals.")
       : "Each number is pages published that day. Grey columns are weekends; striped cells are days still to come. Click any cell to see those pages.";
 
@@ -608,35 +610,29 @@ if(!window.TRACKER_DATA){
             <div class="top"><span class="tot">${tot? tot+" page"+(tot>1?"s":"") : ""}</span><span class="dn ${isToday?"today":""}">${d}</span></div>${evs}</div>`;
         }));
       } else {
-        weeks.forEach((week, wi)=>{
-          const inWeek = week.filter(d=>d!==null);
-          const done = inWeek.filter(d=>!isFuture(d));
+        html = weeks.map((week,wi)=>{ const ds = week.filter(d=>d!==null);
+          return `<div class="hd" style="text-align:left">Week ${wi+1} <span style="font-weight:500">· ${ds[0]}–${ds[ds.length-1]} ${SHORT[m-1]}</span></div>`; }).join("");
+        weeks.forEach(week=>{
+          const inWeek = week.filter(d=>d!==null), done = inWeek.filter(d=>!isFuture(d));
           const first = inWeek[0], last = inWeek[inWeek.length-1];
-          const label = `${first}–${last} ${SHORT[m-1]}`;
-          if(!done.length){ html += `<div class="wrow future"><div class="wl">${label}<small>Still to come</small></div><div></div></div>`; return; }
-          const stillGoing = done.length < inWeek.length;
-          const wk = COMPANIES.map(c=>({c, n: done.reduce((a,d)=>a+grid[c.name][d],0)}));
-          const tot = wk.reduce((a,x)=>a+x.n,0);
-          const dayTot = week.map(d=> d===null || isFuture(d) ? null : COMPANIES.reduce((a,c)=>a+grid[c.name][d],0));
-          const dmax = Math.max(1, ...dayTot.filter(x=>x!==null));
+          const hasToday = partial && inWeek.includes(today);
+          if(!done.length){ html += `<div class="day future wkc"><div class="top"><span class="tot">Still to come</span><span class="dn">${first}–${last}</span></div></div>`; return; }
+          const tot = COMPANIES.reduce((a,c)=>a+done.reduce((x,d)=>x+grid[c.name][d],0),0);
           const sel = selCell && selCell.days && selCell.days[0]===first;
-          html += `<div class="wrow ${sel?"sel":""}" data-days="${done.join(",")}" title="Click to see the pages published ${label}">
-            <div class="wl">${label}${stillGoing?" (so far)":""}<small>${tot} page${tot===1?"":"s"} in total</small></div>
-            <div class="evs">${wk.map(x=> x.n
-              ? `<div class="ev" style="background:${tint(x.c.color)}"><span class="dot" style="background:${x.c.color}"></span><span class="nm">${esc(x.c.name)}</span><b>${x.n}</b></div>`
-              : `<div class="ev zero ${x.c.role==="baseline"?"base":""}"><span class="dot" style="background:${x.c.color}"></span><span class="nm">${esc(x.c.name)}</span><b>0</b></div>`).join("")}</div>
-            <div class="bars">${dayTot.map((n,i)=> week[i]===null ? `<i style="visibility:hidden"></i>` : n===null ? `<i class="f" style="height:2px"></i>` : `<i style="height:${Math.max(2, 26*n/dmax)}px" title="${"Sun Mon Tue Wed Thu Fri Sat".split(" ")[i]} ${week[i]}: ${n} page${n===1?"":"s"}"></i>`).join("")}</div>
-            <div class="bl">${week.map((d,i)=>`<span>${d===null?"":["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][i]+" "+d+(dayTot[i]?` · <b style="color:var(--ink)">${dayTot[i]}</b>`:"")}</span>`).join("")}</div>
-          </div>`;
+          const evs = COMPANIES.map(c=>({c, n: done.reduce((x,d)=>x+grid[c.name][d],0)})).filter(x=>x.n).map(x=>
+            `<div class="ev" style="background:${tint(x.c.color)}"><span class="dot" style="background:${x.c.color}"></span><span class="nm">${esc(x.c.name)}</span><b>${x.n}</b></div>`).join("");
+          html += `<div class="day wkc ${sel?"sel":""}" data-days="${done.join(",")}" title="Click to see the pages published ${first}–${last} ${SHORT[m-1]}">
+            <div class="top"><span class="tot">${tot? tot+" page"+(tot>1?"s":"") : ""}${done.length<inWeek.length?" (so far)":""}</span><span class="dn ${hasToday?"today":""}">${first}–${last}</span></div>${evs}</div>`;
         });
       }
+      document.getElementById("cal").style.gridTemplateColumns = dPer==="week" ? `repeat(${weeks.length},minmax(150px,1fr))` : "";
       document.getElementById("cal").innerHTML = html;
-      document.querySelectorAll("#cal .wrow[data-days]").forEach(el=>el.onclick=()=>{
+      document.querySelectorAll("#cal .day[data-days]").forEach(el=>el.onclick=()=>{
         const ds = el.dataset.days.split(",").map(Number);
         selCell = {co:null, day:ds[0], days:ds}; renderDaily();
         document.getElementById("dayList").scrollIntoView({behavior:"smooth", block:"nearest"});
       });
-      document.querySelectorAll("#cal .day[data-day]").forEach(el=>el.onclick=()=>{
+      document.querySelectorAll("#cal .day[data-day]:not([data-days])").forEach(el=>el.onclick=()=>{
         selCell = {co:null, day:+el.dataset.day}; renderDaily();
         document.getElementById("dayList").scrollIntoView({behavior:"smooth", block:"nearest"});
       });
