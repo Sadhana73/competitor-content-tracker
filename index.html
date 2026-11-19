@@ -330,8 +330,8 @@
       <h2>Page watch</h2>
       <select id="wCmp" aria-label="Compare with">
         <option value="prev">Compare with: last check</option>
-        <option value="wb30">Compare with: ~30 days ago (Wayback Machine)</option>
-        <option value="wb90" selected>Compare with: ~90 days ago (Wayback Machine)</option>
+        <option value="wb30" selected>Compare with: ~30 days ago (Wayback Machine)</option>
+        <option value="wb90">Compare with: ~90 days ago (Wayback Machine)</option>
         <option value="wb365">Compare with: ~1 year ago (Wayback Machine)</option>
       </select>
     </div>
@@ -889,7 +889,7 @@ if(!window.TRACKER_DATA){
       el("wCheck").onclick = () => window.__startJob && window.__startJob("/api/watch/check");
     }
     const picked = el("wCmp").value;
-    const ORDER = ["wb90","wb30","wb365","prev"];
+    const ORDER = ["wb30","wb90","wb365","prev"];
     const has = (w, key) => { const t = key === "prev" ? w.prev : (w.wayback||{})[key]; return t && t.fields; };
     el("wList").innerHTML = W.length ? W.map(w=>{
       let k = picked, note = "";
