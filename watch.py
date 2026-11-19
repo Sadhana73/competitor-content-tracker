@@ -87,7 +87,10 @@ def extract(doc, cfg):
     text = collect.clean(body.group(0) if body else doc)
     words = {w for c in cfg.get("ctaTypes", []) for w in c["words"]}
     all_links = _links(doc)
-    buttons = [t for t in _texts(doc, "button")] + [t for t, h in all_links if any(w in t.lower() for w in words)]
+    # real calls to action only (not menu controls like "Menu", "Close Search" or "Select a language")
+    cta_verbs = re.compile(r"\b(get|start|try|book|request|schedule|sign ?up|join|download|contact|talk|buy|subscribe|register|demo|free|trial|see pricing|watch)\b", re.I)
+    candidates = [t for t in _texts(doc, "button")] + [t for t, h in all_links]
+    buttons = [t for t in candidates if (any(w in t.lower() for w in words) or cta_verbs.search(t)) and len(t.split()) <= 8]
     ai = [f"{t} ({h})" for t, h in all_links if AI_HINTS.search(t + " " + h)]
     ai += [f'<link> {h}' for h in re.findall(r'<link[^>]+href="([^"]*llms?[^"]*\.txt)"', raw, flags=re.I)]
     jsonld = re.findall(r'"@type"\s*:\s*"([^"]+)"', raw)
