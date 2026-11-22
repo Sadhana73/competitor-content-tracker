@@ -1,5 +1,25 @@
 [
 {
+"url": "https://monday.com/blog/ai-agents/meeting-summary-workflow",
+"title": "Meeting summary workflow: 5 steps to action",
+"company": "monday.com",
+"published": "2026-11-22",
+"dateMissing": false,
+"needsDate": false,
+"newInSitemap": true,
+"category": "Automation and integrations",
+"confidence": "Low",
+"setBy": "Rules",
+"meta": "Learn how to build a meeting summary workflow in 5 steps, automate meeting notes, assign action items, and track follow-ups with monday.com.",
+"firstParagraph": "--> A client kickoff ends with a launch date, a budget decision, and three people agreeing to follow up. The next step is making those decisions easy to find and act on. A meeting summary workflow connects the conversation to the work that follows. It gives each commitment an owner, a due date, and a place on the project board.",
+"pageType": "Blog",
+"ctas": [],
+"collected": "2026-11-22",
+"viaNews": false,
+"enriched": true,
+"source": "sitemap"
+},
+{
 "url": "https://www.salesforce.com/blog/pick-a-partner",
 "title": "We Won’t Pick Your Favorite Partner, But We’ll Show You How to Pick Yours",
 "company": "Salesforce",
