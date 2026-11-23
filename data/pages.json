@@ -330,6 +330,23 @@
 "enriched": true
 },
 {
+"url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE5Vb0toTUpfQ3RnbTR3TUZuRk1iLW9SbDNHNXFmNnBaMVZOeXFOc2NXdVdHeG9DVkdoSTJmR3l3REk4QURLOXk3TDVURndEUXNRSzgxYS0xVkVVT1U",
+"title": "The latest articles about AI, Data and CRM",
+"company": "Salesforce",
+"published": "2026-11-20",
+"dateMissing": false,
+"category": "AI in sales",
+"confidence": "Low",
+"setBy": "Rules",
+"meta": "The latest articles about AI, Data and CRM Salesforce",
+"firstParagraph": "",
+"pageType": "Blog",
+"ctas": null,
+"collected": "2026-11-23",
+"viaNews": true,
+"enriched": false
+},
+{
 "url": "https://blog.hubspot.com/sales/prospecting-funnel",
 "title": "Prospecting funnel: How SDR and RevOps teams build one that converts",
 "company": "HubSpot",
@@ -1321,6 +1338,23 @@
 "pageType": "Blog",
 "ctas": null,
 "collected": "2026-11-18",
+"viaNews": true,
+"enriched": false
+},
+{
+"url": "https://news.google.com/rss/articles/CBMihgFBVV95cUxNM05ZUEZURHF4UXJSNkNOblVXUTh1ZDNFSFJXMlh6RUJxNVkwMXYwWkpIZ3VHUVREcURaUlV2SkFweWZsbElZX1h4V19uN05vSUdWakM2SXNHZ2R4Y0F2UDQ2TjczSGhieGtCank0VFZXQUJGYUlZOXhZU1RuaE9FeWZmdDk5dw",
+"title": "6 Tips to Sell Out for Cyber Monday (Ecommerce Holiday Strategies for Startups)",
+"company": "Salesforce",
+"published": "2026-11-17",
+"dateMissing": false,
+"category": "Sales process and productivity",
+"confidence": "Low",
+"setBy": "Rules",
+"meta": "6 Tips to Sell Out for Cyber Monday (Ecommerce Holiday Strategies for Startups) Salesforce",
+"firstParagraph": "",
+"pageType": "Blog",
+"ctas": null,
+"collected": "2026-11-23",
 "viaNews": true,
 "enriched": false
 },
