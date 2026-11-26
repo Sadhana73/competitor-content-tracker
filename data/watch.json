@@ -9,6 +9,11 @@
    "url": "https://www.salesforce.com/",
    "name": "Salesforce home page",
    "added": "2026-11-19"
+  },
+  {
+   "url": "https://zoho.com/",
+   "name": "zoho.com home page",
+   "added": "2026-11-26"
   }
  ]
 }
