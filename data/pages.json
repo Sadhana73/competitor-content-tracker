@@ -406,6 +406,52 @@
 "enriched": true
 },
 {
+"url": "https://www.brevo.com/blog/what-is-a-customer-engagement-platform",
+"title": "What Is a Customer Engagement Platform? Definition & Examples",
+"company": "Brevo",
+"published": "2026-11-26",
+"dateMissing": true,
+"needsDate": false,
+"newInSitemap": false,
+"category": "Sales templates and resources",
+"confidence": "Low",
+"setBy": "Rules",
+"meta": "A customer engagement platform unifies your customer data and automates personalized messaging across channels. Learn how it works, its benefits, and more.",
+"firstParagraph": "Your customer browses three products, abandons their cart, then messages support about a different order — and none of your tools notice the connection. That's the gap a customer engagement platform (CEP) closes.",
+"pageType": "Blog",
+"ctas": [
+"Free trial / sign up"
+],
+"collected": "2026-11-27",
+"viaNews": false,
+"enriched": true,
+"source": "sitemap",
+"exclude": "no publish date on the page"
+},
+{
+"url": "https://www.brevo.com/blog/shopify-marketing-automations",
+"title": "Shopify Marketing Automation: How to Set Up Workflows",
+"company": "Brevo",
+"published": "2026-11-26",
+"dateMissing": true,
+"needsDate": false,
+"newInSitemap": false,
+"category": "Marketing and email",
+"confidence": "Low",
+"setBy": "Rules",
+"meta": "And not just triggers; explore the various conditions and actions you need to focus on to build powerful Shopify marketing automations and workflows.",
+"firstParagraph": "Building Shopify marketing automation is less about setting up individual workflows and more about connecting triggers, conditions, and actions into a system that works across the customer journey.",
+"pageType": "Blog",
+"ctas": [
+"Webinar / event"
+],
+"collected": "2026-11-27",
+"viaNews": false,
+"enriched": true,
+"source": "sitemap",
+"exclude": "no publish date on the page"
+},
+{
 "url": "https://www.brevo.com/blog/omnichannel-vs-multichannel",
 "title": "Omnichannel vs. Multichannel Marketing: What Is the Difference?",
 "company": "Brevo",
@@ -426,6 +472,76 @@
 "viaNews": false,
 "enriched": true,
 "source": "sitemap"
+},
+{
+"url": "https://www.brevo.com/blog/customer-engagement-strategy",
+"title": "How to Create a Customer Engagement Strategy in 6 Steps",
+"company": "Brevo",
+"published": "2026-11-26",
+"dateMissing": true,
+"needsDate": false,
+"newInSitemap": false,
+"category": "Marketing and email",
+"confidence": "Low",
+"setBy": "Rules",
+"meta": "Learn how to build a customer engagement strategy in 6 steps, plus 9 proven tactics to boost loyalty, reduce churn, and grow customer lifetime value.",
+"firstParagraph": "Most customers won't tell you they're losing interest — they'll just stop opening your emails, drift off your site, and eventually buy from someone else. By the time it shows up in your churn numbers, the disengagement has usually been building for months.",
+"pageType": "Blog",
+"ctas": [
+"Free trial / sign up",
+"Webinar / event"
+],
+"collected": "2026-11-27",
+"viaNews": false,
+"enriched": true,
+"source": "sitemap",
+"exclude": "no publish date on the page"
+},
+{
+"url": "https://www.brevo.com/blog/customer-engagement",
+"title": "What Is Customer Engagement? Full 2026 Guide",
+"company": "Brevo",
+"published": "2026-11-26",
+"dateMissing": true,
+"needsDate": false,
+"newInSitemap": false,
+"category": "Marketing and email",
+"confidence": "Low",
+"setBy": "Rules",
+"meta": "What is customer engagement, and why does it matter? Explore the definition, key metrics, and real data on retention and revenue.",
+"firstParagraph": "Customer engagement isn't a buzzword. It's the difference between a customer who opens one email and forgets you, and one who sticks around for years.",
+"pageType": "Blog",
+"ctas": [
+"Free trial / sign up"
+],
+"collected": "2026-11-27",
+"viaNews": false,
+"enriched": true,
+"source": "sitemap",
+"exclude": "no publish date on the page"
+},
+{
+"url": "https://www.brevo.com/blog/behavioral-segmentation",
+"title": "Behavioral Segmentation: Types, Examples & How to Use It",
+"company": "Brevo",
+"published": "2026-11-26",
+"dateMissing": true,
+"needsDate": false,
+"newInSitemap": false,
+"category": "Sales templates and resources",
+"confidence": "Low",
+"setBy": "Rules",
+"meta": "Behavioral segmentation groups contacts by what they do, not who they are. See the main types, real examples, and how to set it up step by step.",
+"firstParagraph": "Most segmentation still starts with who someone is: age, location, job title. That data goes stale fast, and it rarely explains why someone buys, opens an email, or quietly stops engaging. Behavioral segmentation takes a different starting point: it groups customers based on what they actually do, not who they are on paper.",
+"pageType": "Blog",
+"ctas": [
+"Free trial / sign up"
+],
+"collected": "2026-11-27",
+"viaNews": false,
+"enriched": true,
+"source": "sitemap",
+"exclude": "no publish date on the page"
 },
 {
 "url": "https://thehustle.co/news/the-business-at-the-bottom-of-hollywoods-food-chain",
@@ -9511,6 +9627,30 @@
 "viaNews": true,
 "enriched": false,
 "exclude": "Google News result older than 45 days"
+},
+{
+"url": "https://www.brevo.com/blog/what-is-email-marketing",
+"title": "What is Email Marketing? [Complete 2026 Guide]",
+"company": "Brevo",
+"published": "2026-09-24",
+"dateMissing": false,
+"needsDate": false,
+"newInSitemap": false,
+"category": "Marketing and email",
+"confidence": "Low",
+"setBy": "Rules",
+"meta": "Email marketing is a direct marketing channel that lets businesses share information, promotions, and updates with customers on their contact lists.",
+"firstParagraph": "Email marketing is a form of digital marketing that uses email to build relationships with customers and drive sales.",
+"pageType": "Blog",
+"ctas": [
+"Free trial / sign up",
+"Newsletter"
+],
+"collected": "2026-11-27",
+"viaNews": false,
+"enriched": true,
+"source": "sitemap",
+"exclude": "old page updated, not new"
 },
 {
 "url": "https://www.brevo.com/blog/email-marketing-best-practices",
@@ -29637,6 +29777,29 @@
 "exclude": "old page updated, not new"
 },
 {
+"url": "https://www.brevo.com/blog/hubspot-competitors",
+"title": "12 Best HubSpot Competitors (2026)",
+"company": "Brevo",
+"published": "2025-09-23",
+"dateMissing": false,
+"needsDate": false,
+"newInSitemap": false,
+"category": "CRM basics and comparisons",
+"confidence": "Low",
+"setBy": "Rules",
+"meta": "Find the HubSpot competitor that fits your marketing and sales strategy as well as your budget: Brevo, Mailchimp, Salesforce, Marketo, ActiveCampaign, and more",
+"firstParagraph": "HubSpot is one of the most comprehensive marketing and CRM software platforms available. But what if you don’t need such a complex service? Consider turning to a HubSpot competitor for the features and functionality you need at a better price.",
+"pageType": "Blog",
+"ctas": [
+"Free trial / sign up"
+],
+"collected": "2026-11-27",
+"viaNews": false,
+"enriched": true,
+"source": "sitemap",
+"exclude": "old page updated, not new"
+},
+{
 "url": "https://monday.com/blog/rnd/agile-transformation",
 "title": "Agile Transformation Roadmap: Strategies That Work In 2025",
 "company": "monday.com",
@@ -31587,6 +31750,29 @@
 "exclude": "old page updated, not new"
 },
 {
+"url": "https://www.brevo.com/blog/omnichannel-campaign-examples",
+"title": "9 Omnichannel Campaigns to Inspire Your Customer Journeys",
+"company": "Brevo",
+"published": "2025-05-07",
+"dateMissing": false,
+"needsDate": false,
+"newInSitemap": false,
+"category": "Sales templates and resources",
+"confidence": "Low",
+"setBy": "Rules",
+"meta": "Omnichannel marketing is foundational for delivering consistent experiences across every touchpoint. Get inspired by these omnichannel campaign examples.",
+"firstParagraph": "Omnichannel marketing has become a foundational strategy for delivering consistent, customer-centric experiences across every touchpoint.",
+"pageType": "Blog",
+"ctas": [
+"Template / download"
+],
+"collected": "2026-11-27",
+"viaNews": false,
+"enriched": true,
+"source": "sitemap",
+"exclude": "old page updated, not new"
+},
+{
 "url": "https://www.brevo.com/blog/best-ai-email-writers",
 "title": "7 Best AI Email Writers & Why We Chose Them",
 "company": "Brevo",
@@ -33236,6 +33422,53 @@
 "exclude": "old page updated, not new"
 },
 {
+"url": "https://www.brevo.com/blog/email-personalization-tips",
+"title": "Personalized Emails: How to Reach Customers and Generate Sales|Personalized Emails: How to Reach Customers and Generate Sales",
+"company": "Brevo",
+"published": "2024-06-24",
+"dateMissing": false,
+"needsDate": false,
+"newInSitemap": false,
+"category": "Marketing and email",
+"confidence": "Low",
+"setBy": "Rules",
+"meta": "Email personalization is when your subscribers receive slightly different versions of the same marketing campaign that contain content that is tailored to the person receiving the email. These differences can range from using a subscriber’s name to featuring different products based on their prefere",
+"firstParagraph": "Are you sending email campaigns but struggling to reach your audience? Maybe you’re just starting out with email marketing ? In either case, personalized emails are a great way to take your email marketing strategy to the next level.",
+"pageType": "Blog",
+"ctas": [
+"Free trial / sign up"
+],
+"collected": "2026-11-27",
+"viaNews": false,
+"enriched": true,
+"source": "sitemap",
+"exclude": "old page updated, not new"
+},
+{
+"url": "https://www.brevo.com/blog/email-list-segmentation",
+"title": "Email Segmentation: 10 Strategies & How to Get Started|Email Segmentation: 10 Strategies & How to Get Started",
+"company": "Brevo",
+"published": "2024-06-23",
+"dateMissing": false,
+"needsDate": false,
+"newInSitemap": false,
+"category": "Marketing and email",
+"confidence": "Low",
+"setBy": "Rules",
+"meta": "Email segmentation is the practice of dividing email lists into groups based on shared characteristics. This lets you send relevant content and boost conversions.",
+"firstParagraph": "Email segmentation is the process of separating contact lists into smaller sections according to shared characteristics. Marketers can then target different segments with tailored email campaigns based on what they know about subscribers.",
+"pageType": "Blog",
+"ctas": [
+"Free trial / sign up",
+"Newsletter"
+],
+"collected": "2026-11-27",
+"viaNews": false,
+"enriched": true,
+"source": "sitemap",
+"exclude": "old page updated, not new"
+},
+{
 "url": "https://news.google.com/rss/articles/CBMibkFVX3lxTE5wZE5ZWTF4NFFkcXFwUWNKTVhBLWFZQXAxOHBkLWgxc1VMbVhOM2QwY1hOZnNreU92TDhSdlRaU24xY2ZEaU1XcGpHU3JHMkRCOWVjQ3BtSHJZMHgwR25UUVdLSENmMjNjbk9XWHln",
 "title": "Holiday Shopping Will Look Different This Year as Shoppers Take on More Debt",
 "company": "Salesforce",
@@ -33573,6 +33806,30 @@
 "exclude": "old page updated, not new"
 },
 {
+"url": "https://www.brevo.com/blog/customer-segmentation-examples",
+"title": "12 Customer Segmentation Examples for Targeted Marketing",
+"company": "Brevo",
+"published": "2024-03-30",
+"dateMissing": false,
+"needsDate": false,
+"newInSitemap": false,
+"category": "Sales templates and resources",
+"confidence": "Low",
+"setBy": "Rules",
+"meta": "Common customer segmentation examples include personality traits, shopping preferences, and interactions with your website and brand.",
+"firstParagraph": "Customer segmentation is the key to tailored and relevant marketing campaigns. We’ve collected some of the best customer segmentation examples to help your marketing efforts succeed.",
+"pageType": "Blog",
+"ctas": [
+"Free trial / sign up",
+"Newsletter"
+],
+"collected": "2026-11-27",
+"viaNews": false,
+"enriched": true,
+"source": "sitemap",
+"exclude": "old page updated, not new"
+},
+{
 "url": "https://www.brevo.com/blog/b2b-email-marketing",
 "title": "How to Make B2B Email Marketing Work for You",
 "company": "Brevo",
@@ -33694,6 +33951,29 @@
 "pageType": "Blog",
 "ctas": [],
 "collected": "2026-11-18",
+"viaNews": false,
+"enriched": true,
+"source": "sitemap",
+"exclude": "old page updated, not new"
+},
+{
+"url": "https://www.brevo.com/blog/what-is-customer-data-platform",
+"title": "What is a Customer Data Platform and How Does it Work?",
+"company": "Brevo",
+"published": "2024-03-05",
+"dateMissing": false,
+"needsDate": false,
+"newInSitemap": false,
+"category": "Marketing and email",
+"confidence": "Low",
+"setBy": "Rules",
+"meta": "A customer data platform is software that helps you centralize and manage customer data from multiple sources and sync it to your other business tools.",
+"firstParagraph": "Do you need a way to piece together scattered customer data without having to rely on IT teams to constantly track it all down? A customer data platform (CDP) is exactly that — a single source of truth of all your customer data and a game-changing tool for elevating your brand experience.",
+"pageType": "Blog",
+"ctas": [
+"Book a demo"
+],
+"collected": "2026-11-27",
 "viaNews": false,
 "enriched": true,
 "source": "sitemap",
