@@ -1,5 +1,22 @@
 [
 {
+"url": "https://www.salesforce.com/blog/small-business/token-management-for-business-owners",
+"title": "We’re Talking Token Management and it’s Not Arcade Flashbacks",
+"company": "Salesforce",
+"published": "2026-11-27",
+"dateMissing": false,
+"category": "AI in sales",
+"confidence": "Low",
+"setBy": "Rules",
+"meta": "Learn how token management for small business helps you control AI costs, keep prompts clear, and track usage without technical stress.",
+"firstParagraph": "",
+"pageType": "Blog",
+"ctas": [],
+"collected": "2026-11-28",
+"viaNews": false,
+"enriched": true
+},
+{
 "url": "https://www.zoho.com/crm/verticals/manufacturing/service-management.html",
 "title": "Zoho Manufacturing CRM for service management",
 "company": "Zoho CRM",
@@ -33463,6 +33480,30 @@
 "Newsletter"
 ],
 "collected": "2026-11-27",
+"viaNews": false,
+"enriched": true,
+"source": "sitemap",
+"exclude": "old page updated, not new"
+},
+{
+"url": "https://www.brevo.com/blog/whatsapp-marketing",
+"title": "WhatsApp Marketing: Strategies, Tips and Examples for Business",
+"company": "Brevo",
+"published": "2024-06-21",
+"dateMissing": false,
+"needsDate": false,
+"newInSitemap": false,
+"category": "Sales templates and resources",
+"confidence": "Low",
+"setBy": "Rules",
+"meta": "WhatsApp marketing is any kind of promotional activity that happens on WhatsApp. Learn how to use features like product catalogs, statuses, automation...",
+"firstParagraph": "What makes WhatsApp marketing so powerful? It’s arguably the most direct form of customer communication, has an audience of over 3 billion active users , and boasts open rates of up to 98%.",
+"pageType": "Blog",
+"ctas": [
+"Newsletter",
+"Talk to sales"
+],
+"collected": "2026-11-28",
 "viaNews": false,
 "enriched": true,
 "source": "sitemap",
